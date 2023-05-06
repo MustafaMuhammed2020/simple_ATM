@@ -9,14 +9,14 @@
 
 int main(void)
 {
-	APP_init();
-	APP_cardprogram();
-    APP_storecard();
-	APP_getcarddata();
-    APP_start();
-    while (1) 
-    {
-		
-    }
+	APP_init(); /** INITIALIZATION **/
+	APP_cardprogram(); /** PROGRAMMING THE CARD **/
+    APP_storecard(); /** STORE CARD DATA IN EEPROM **/
+	APP_getcarddata(); /** GET CARD DATA FROM THE EEPROM **/
+    APP_sendcarddata(); /** START THE **/
+//     while (1) 
+//     {
+// 		
+//     }
 }
 

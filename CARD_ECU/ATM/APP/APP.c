@@ -45,9 +45,6 @@ uint8_t readpan[20] = "0000000000000000000";
 /** FUNCTION FOR INITIALIZATION **/
 void APP_init()
 {
-//  	DDRA = 0xFF ;  /** OUTPUT **/
-//  	PORTA = 0x00 ; /** INITIAL VALUE 0 **/
-
    TMR0_init(); /** TIMER 0 INITIALIZATION **/
 	
 	UART_init();  /** INITIALIZATION UART MODULE **/
@@ -60,11 +57,13 @@ void APP_init()
 /** FUNCTION TO PROGRAM THE CARD DATA **/
 void APP_cardprogram()
 {
-	uint8_t u8_a_num = 0 , u8_character = 0; /** PIN NUMBER ITERATOR **/
+	/** PIN NUMBER ITERATOR , CHARACTER FOUND STATUS , COUNTER FOR PIN ATTEMPTS **/
+	uint8_t u8_a_num = 0 , u8_character = 0 , u8_a_try = 0; 
+	
 	/************************************************************************/
 	/**                     PROGRAMMING THE CARD                           **/
 	/************************************************************************/
-	uint8_t u8_a_try = 0 ; /** COUNTER FOR PIN ATTEMPTS **/
+	//uint8_t u8_a_try = 0 ; /** COUNTER FOR PIN ATTEMPTS **/
 	
 	UART_sendstr("\r\n          you are in the programming mode\r\n"); /** MESSAGE **/
 	
@@ -138,12 +137,14 @@ void APP_storecard()
 /** FUNCTION TO READ CARD DATA FROM EEPROM **/
 void APP_getcarddata(void)
 {
+	/** GET PIN FROM THE EEPROM **/
 	for (uint16_t counter = 0x0000 ; counter < 0x0004 ; counter++)
 	{
 		EEPROM_readbyte(CARD_PINADDRESS_0+counter , &readpin[counter] , PAGE_0 );
 		TMR0_delayms(20);
 	}
 	
+	/** GET PAN FROM THE EEPROM **/ 
 	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
 	{
 		EEPROM_readbyte(CARD_PANADDRESS_0+pan_counter , &readpan[pan_counter] , PAGE_0 );
@@ -152,20 +153,21 @@ void APP_getcarddata(void)
 			
 }
 
-void APP_start() 
+/** FUNCTION TO SEND CARD DATA TO ATM ECU **/
+void APP_sendcarddata() 
 {
- 	SPI_masterinittransmit();
+ 	SPI_masterinittransmit(); /** START SPI TRANSMISSION **/
  	
- 	SPI_sendstring(u8_g_cardpin);
+ 	SPI_sendstring(u8_g_cardpin); /** SEND STORED PIN TO ATM **/
 	
-	SPI_masterendtransmit();
+	SPI_masterendtransmit(); /** END TRANSMISSION **/
 	
-	TMR0_delayms(30);
+	TMR0_delayms(30); /** DELAY FOR 30 MS **/
 	
-	SPI_masterinittransmit();
+	SPI_masterinittransmit(); /** START SPI TRANSMISSION **/
 	
-	SPI_sendstring(u8_g_cardpan);
+	SPI_sendstring(u8_g_cardpan); /** SEND STORED PIN TO ATM **/
 	
-	SPI_masterendtransmit();
+	SPI_masterendtransmit();/** END TRANSMISSION **/
    
 }
