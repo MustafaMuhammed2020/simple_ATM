@@ -20,7 +20,7 @@
 #include "KEYPAD_config.h"
 
 
-#define ROWS_SIZE 4
+#define ROWS_SIZE 3
 #define COLUMNS_SIZE 3
 
 /***************************************************************************/
@@ -98,15 +98,15 @@ KEYPAD_readError KEYPAD_read(uint8_t *u8_a_value)
                 {
                     if (u8_a_coulumniterator == 0)
                     {
-                        *u8_a_value = 1 ;
+                        *u8_a_value = '1' ;
                     }
                     else if (u8_a_coulumniterator == 1)
                     {
-                        *u8_a_value = 2 ;
+                        *u8_a_value = '2' ;
                     }
                     else if (u8_a_coulumniterator == 2)
                     {
-                        *u8_a_value = 3 ;
+                        *u8_a_value = '3' ;
                     }
                 }
 
@@ -114,15 +114,15 @@ KEYPAD_readError KEYPAD_read(uint8_t *u8_a_value)
                 {
                     if (u8_a_coulumniterator == 0)
                     {
-                        *u8_a_value = 4 ;
+                        *u8_a_value = '4' ;
                     }
                     else if (u8_a_coulumniterator == 1)
                     {
-                        *u8_a_value = 5 ;
+                        *u8_a_value = '5' ;
                     }
                     else if (u8_a_coulumniterator == 2)
                     {
-                        *u8_a_value = 6 ;
+                        *u8_a_value = '6' ;
                     }
                 }
 
@@ -130,23 +130,23 @@ KEYPAD_readError KEYPAD_read(uint8_t *u8_a_value)
                 {
                     if (u8_a_coulumniterator == 0)
                     {
-                        *u8_a_value = 7 ;
+                        *u8_a_value = '7' ;
                     }
                     else if (u8_a_coulumniterator == 1)
                     {
-                        *u8_a_value = 8 ;
+                        *u8_a_value = '8' ;
                     }
                     else if (u8_a_coulumniterator == 2)
                     {
-                        *u8_a_value = 9 ;
+                        *u8_a_value = '9' ;
                     }
                 }
 
                 DIO_togglepin( ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] );
-                return KEYPAD_readSuccess;
+                //return KEYPAD_readSuccess;
             }
         }
         DIO_togglepin( ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] );
     }
-    return KEYPAD_readFail;
+    //return KEYPAD_readFail;
 }

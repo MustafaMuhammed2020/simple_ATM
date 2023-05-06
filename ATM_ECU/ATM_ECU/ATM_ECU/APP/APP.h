@@ -8,10 +8,10 @@
 #ifndef APP_H_
 #define APP_H_
 
-void APP_init();
+void APP_init(void);
 
-void APP_start() ;
+void APP_start(void) ;
 
-
+void APP_readuserpin(void);
 
 #endif /* APP_H_ */

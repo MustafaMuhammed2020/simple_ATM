@@ -4,13 +4,15 @@
 
 APP\APP.c
 
+HAL\button\button_program.c
+
+HAL\keypad\KEYPAD_program.c
+
 HAL\lcd\LCD_program.c
 
 main.c
 
 MCAL\dio\DIO_program.c
-
-MCAL\i2c\I2C_program.c
 
 MCAL\spi\SPI_program.c
 

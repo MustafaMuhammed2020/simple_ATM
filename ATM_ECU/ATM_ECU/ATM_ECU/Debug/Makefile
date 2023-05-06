@@ -37,6 +37,16 @@ SUBDIRS :=  \
 ../Debug/APP/ \
 ../Debug/Debug/ \
 ../Debug/Debug/APP/ \
+../Debug/Debug/Debug/ \
+../Debug/Debug/Debug/APP/ \
+../Debug/Debug/Debug/HAL/ \
+../Debug/Debug/Debug/HAL/buzzer/ \
+../Debug/Debug/Debug/HAL/lcd/ \
+../Debug/Debug/Debug/MCAL/ \
+../Debug/Debug/Debug/MCAL/dio/ \
+../Debug/Debug/Debug/MCAL/spi/ \
+../Debug/Debug/Debug/MCAL/timer0/ \
+../Debug/Debug/Debug/SERVICE/ \
 ../Debug/Debug/HAL/ \
 ../Debug/Debug/HAL/buzzer/ \
 ../Debug/Debug/HAL/lcd/ \
@@ -53,13 +63,14 @@ SUBDIRS :=  \
 ../Debug/MCAL/spi/ \
 ../Debug/MCAL/timer0/ \
 ../Debug/SERVICE/ \
+../HAL/button/ \
+../HAL/keypad/ \
 ../HAL/lcd \
 ../HAL/buzzer \
 ../MCAL \
 ../HAL \
 ../APP \
 ../MCAL/dio \
-../MCAL/i2c \
 ../MCAL/timer0 \
 ../MCAL/spi \
 ../SERVICE
@@ -68,10 +79,11 @@ SUBDIRS :=  \
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../APP/APP.c \
+../HAL/button/button_program.c \
+../HAL/keypad/KEYPAD_program.c \
 ../HAL/lcd/LCD_program.c \
 ../main.c \
 ../MCAL/dio/DIO_program.c \
-../MCAL/i2c/I2C_program.c \
 ../MCAL/spi/SPI_program.c \
 ../MCAL/timer0/TMR0_program.c
 
@@ -84,37 +96,41 @@ ASM_SRCS +=
 
 OBJS +=  \
 APP/APP.o \
+HAL/button/button_program.o \
+HAL/keypad/KEYPAD_program.o \
 HAL/lcd/LCD_program.o \
 main.o \
 MCAL/dio/DIO_program.o \
-MCAL/i2c/I2C_program.o \
 MCAL/spi/SPI_program.o \
 MCAL/timer0/TMR0_program.o
 
 OBJS_AS_ARGS +=  \
 APP/APP.o \
+HAL/button/button_program.o \
+HAL/keypad/KEYPAD_program.o \
 HAL/lcd/LCD_program.o \
 main.o \
 MCAL/dio/DIO_program.o \
-MCAL/i2c/I2C_program.o \
 MCAL/spi/SPI_program.o \
 MCAL/timer0/TMR0_program.o
 
 C_DEPS +=  \
 APP/APP.d \
+HAL/button/button_program.d \
+HAL/keypad/KEYPAD_program.d \
 HAL/lcd/LCD_program.d \
 main.d \
 MCAL/dio/DIO_program.d \
-MCAL/i2c/I2C_program.d \
 MCAL/spi/SPI_program.d \
 MCAL/timer0/TMR0_program.d
 
 C_DEPS_AS_ARGS +=  \
 APP/APP.d \
+HAL/button/button_program.d \
+HAL/keypad/KEYPAD_program.d \
 HAL/lcd/LCD_program.d \
 main.d \
 MCAL/dio/DIO_program.d \
-MCAL/i2c/I2C_program.d \
 MCAL/spi/SPI_program.d \
 MCAL/timer0/TMR0_program.d
 
@@ -139,6 +155,20 @@ APP/APP.o: ../APP/APP.c
 	@echo Finished building: $<
 	
 
+HAL/button/button_program.o: ../HAL/button/button_program.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+HAL/keypad/KEYPAD_program.o: ../HAL/keypad/KEYPAD_program.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 HAL/lcd/LCD_program.o: ../HAL/lcd/LCD_program.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
@@ -154,13 +184,6 @@ HAL/lcd/LCD_program.o: ../HAL/lcd/LCD_program.c
 	
 
 MCAL/dio/DIO_program.o: ../MCAL/dio/DIO_program.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-MCAL/i2c/I2C_program.o: ../MCAL/i2c/I2C_program.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

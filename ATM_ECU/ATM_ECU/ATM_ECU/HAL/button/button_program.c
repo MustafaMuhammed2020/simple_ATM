@@ -6,11 +6,11 @@
 /**************************************************/
 
 /** INCLUDE THE LIBRARIES */
-#include "standard_types.h"
-#include "common_macros.h"
+#include "../../SERVICE/standard_types.h"
+#include "../../SERVICE/common_macros.h"
 
 /** INCLUDE INTERFACE OF LOWER LAYERS **/
-#include "DIO_interface.h"
+#include "../../MCAL/dio/DIO_interface.h"
 
 
 /** INCLUDE THE DRIVER FILES */
