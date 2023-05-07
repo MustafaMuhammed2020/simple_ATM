@@ -8,10 +8,16 @@
 #ifndef APP_H_
 #define APP_H_
 
+/** INITIALIZATION FUNCTION **/
 void APP_init(void);
 
-void APP_start(void) ;
-
+/** FUNCTION TO READ USER PIN **/
 void APP_readuserpin(void);
+
+/** FUNCTION TO COMMUNICATE WITH CARD ECU TO GET PIN/PAN **/
+void APP_startcardcomm(void);
+
+/** FUNCTION TO GET THE AMOUNT OF MONEY NEEDED **/
+void APP_getamount();
 
 #endif /* APP_H_ */

@@ -4,6 +4,8 @@
 
 APP\APP.c
 
+HAL\button\button_program.c
+
 HAL\eeprom\EEPROM_program.c
 
 HAL\lcd\LCD_program.c

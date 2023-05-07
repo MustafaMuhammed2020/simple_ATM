@@ -9,14 +9,20 @@
 
 int main(void)
 {
-	APP_init();
+	APP_init(); /** INITIALIZATION **/
 	
-	APP_start();
+	APP_readuserpin(); /** READ USER PIN **/
 	
-	while (1)
-	{
-	//	APP_start();
-		
-	}
+	APP_startcardcomm();  /** START **/ 
+	
+	APP_getamount(); /** GET NEEDED MONEY **/
+
+
+	
+// 	while (1)
+// 	{
+// 		
+// 	
+// 	}
 }
 

@@ -16,7 +16,6 @@
 #include "../MCAL/timer0/TMR0_config.h"
 
 #include "../MCAL/dio/DIO_interface.h"
-#include "../MCAL/dio/DIO_private.h"
 
 #include "../MCAL/uart/UART_interface.h"
 
@@ -28,6 +27,10 @@
 #include "../HAL/lcd/LCD_interface.h"
 
 #include "../HAL/eeprom/EEPROM_interface.h"
+
+#include "../HAL/button/button_interface.h"
+#include "../HAL/button/button_config.h"
+
 
 /** INCLUDE LAYER FILES **/
 #include "APP.h"
@@ -41,17 +44,21 @@ uint8_t u8_a_notmatched = 0 ;
 uint8_t readpin[5] = "0000" ;
 uint8_t readpan[20] = "0000000000000000000";
 
-
 /** FUNCTION FOR INITIALIZATION **/
 void APP_init()
 {
-   TMR0_init(); /** TIMER 0 INITIALIZATION **/
+    TMR0_init(); /** TIMER 0 INITIALIZATION **/
 	
 	UART_init();  /** INITIALIZATION UART MODULE **/
 	
 	SPI_initmaster(); /** INITIALIZE SPI MASTER **/
 	
 	EEPROM_init(); /** INITIALIZE EEPROM MODULE **/
+	
+	Button_init(BUTTON1_PORT , BUTTON1_PIN); /** COMMUNICATION TRIGGER **/
+	
+	DIO_setpindir(DIO_PORTA , DIO_PIN0 , DIO_PIN_OUTPUT); /** OUTPUT PIN TO TRIGGER ATM ECU **/
+	DIO_setpinvalue(DIO_PORTA , DIO_PIN0 , DIO_PIN_LOW);  /** PIN IS LOW (TRIGGER OFF)      **/
 }
 
 /** FUNCTION TO PROGRAM THE CARD DATA **/
@@ -82,7 +89,7 @@ void APP_cardprogram()
 		while(u8_a_num < 4)
 		{
 			/** VALIDATE THE USER INPUT AS NUMBERS ONLY **/
-			if (!((u8_g_cardpin[u8_a_num] > 48) && (u8_g_cardpin[u8_a_num] < 57)))
+			if (!((u8_g_cardpin[u8_a_num] > 47) && (u8_g_cardpin[u8_a_num] < 57)))
 			{
 				u8_character = 1 ; /** CHARACTER FOUND **/
 			}
@@ -149,8 +156,13 @@ void APP_getcarddata(void)
 	{
 		EEPROM_readbyte(CARD_PANADDRESS_0+pan_counter , &readpan[pan_counter] , PAGE_0 );
 		TMR0_delayms(20);
-	}
-			
+	}	
+}
+
+APP_sendtrigger()
+{
+	/** ACTIVATE THE TRIGGER PIN **/
+	DIO_setpinvalue(DIO_PORTA , DIO_PIN0 , DIO_PIN_HIGH);
 }
 
 /** FUNCTION TO SEND CARD DATA TO ATM ECU **/

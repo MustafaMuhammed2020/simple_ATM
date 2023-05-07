@@ -20,7 +20,7 @@
 #include "KEYPAD_config.h"
 
 
-#define ROWS_SIZE 3
+#define ROWS_SIZE 4
 #define COLUMNS_SIZE 3
 
 /***************************************************************************/
@@ -35,6 +35,7 @@ KEYPAD_initError KEYPAD_init(void)
     DIO_setpindir(ROW_PORT_DATA, R1 , DIO_PIN_OUTPUT);
 	DIO_setpindir(ROW_PORT_DATA, R2 , DIO_PIN_OUTPUT);
 	DIO_setpindir(ROW_PORT_DATA, R3 , DIO_PIN_OUTPUT);
+	DIO_setpindir(DIO_PORTD, R4 , DIO_PIN_OUTPUT);
 	
     /*Columns direction initialization*/
 	DIO_setpindir(COLUMN_PORT_DATA , C1 , DIO_PIN_INPUT);
@@ -46,6 +47,7 @@ KEYPAD_initError KEYPAD_init(void)
     DIO_setpinvalue(ROW_PORT_DATA , R1 ,  DIO_PIN_LOW);
 	DIO_setpinvalue(ROW_PORT_DATA , R2 ,  DIO_PIN_LOW);
 	DIO_setpinvalue(ROW_PORT_DATA , R3 ,  DIO_PIN_LOW);
+	DIO_setpinvalue(DIO_PORTD , R4 ,  DIO_PIN_LOW);
 	
 
     #elif CONNECTION == 'U'
@@ -53,6 +55,7 @@ KEYPAD_initError KEYPAD_init(void)
 	DIO_setpinvalue(ROW_PORT_DATA , R1 , DIO_PIN_HIGH);
 	DIO_setpinvalue(ROW_PORT_DATA , R2 , DIO_PIN_HIGH);
 	DIO_setpinvalue(ROW_PORT_DATA , R3 , DIO_PIN_HIGH);
+	DIO_setpinvalue(DIO_PORTD , R4 , DIO_PIN_HIGH);
 	
 	DIO_setpinvalue(COLUMN_PORT_DATA , C1 , DIO_PIN_HIGH);
 	DIO_setpinvalue(COLUMN_PORT_DATA , C2 , DIO_PIN_HIGH);
@@ -87,7 +90,14 @@ KEYPAD_readError KEYPAD_read(uint8_t *u8_a_value)
 
     for (u8_a_rowiterator = 0; u8_a_rowiterator < ROWS_SIZE; u8_a_rowiterator++)
     {
-        DIO_setpinvalue(ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] , u8_l_pinValue);
+		if (u8_a_rowiterator == 3 )
+		{
+			DIO_setpinvalue(DIO_PORTD , DIO_PIN0, u8_l_pinValue);
+		}
+		else
+		{
+			DIO_setpinvalue(ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] , u8_l_pinValue);
+		}
 
         for (u8_a_coulumniterator = 0; u8_a_coulumniterator < COLUMNS_SIZE; u8_a_coulumniterator++)
         {
@@ -141,12 +151,35 @@ KEYPAD_readError KEYPAD_read(uint8_t *u8_a_value)
                         *u8_a_value = '9' ;
                     }
                 }
-
-                DIO_togglepin( ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] );
-                //return KEYPAD_readSuccess;
+				
+				else if (u8_a_rowiterator == 3)
+				{
+					if (u8_a_coulumniterator == 0)
+					{
+						*u8_a_value = '0' ;
+					}
+				}
+				if (u8_a_rowiterator == 3)
+				{
+					DIO_togglepin( DIO_PORTD , DIO_PIN0);
+					return KEYPAD_readSuccess;
+				}
+				else
+				{
+					
+					DIO_togglepin( ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] );
+					return KEYPAD_readSuccess;
+				}
             }
         }
-        DIO_togglepin( ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] );
+		if (u8_a_rowiterator == 3)
+		{
+			DIO_togglepin( DIO_PORTD , DIO_PIN0);
+		}
+		else
+		{
+			DIO_togglepin( ROW_PORT_DATA , u8_l_Rows[u8_a_rowiterator] );
+		}
     }
-    //return KEYPAD_readFail;
+    return KEYPAD_readFail;
 }

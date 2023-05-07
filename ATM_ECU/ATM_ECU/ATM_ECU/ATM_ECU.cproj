@@ -166,6 +166,18 @@
     <Compile Include="HAL\button\button_program.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="HAL\buzzer\buzzer_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\buzzer\buzzer_interface.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\buzzer\buzzer_private.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\buzzer\buzzer_program.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="HAL\keypad\KEYPAD_config.h">
       <SubType>compile</SubType>
     </Compile>
@@ -260,7 +272,9 @@
     <Folder Include="Debug\Debug\MCAL\timer0\" />
     <Folder Include="Debug\Debug\SERVICE\" />
     <Folder Include="Debug\HAL\" />
+    <Folder Include="Debug\HAL\button\" />
     <Folder Include="Debug\HAL\buzzer\" />
+    <Folder Include="Debug\HAL\keypad\" />
     <Folder Include="Debug\HAL\lcd\" />
     <Folder Include="Debug\MCAL\" />
     <Folder Include="Debug\MCAL\dio\" />
@@ -283,10 +297,46 @@
     <None Include="ATM_ECU.componentinfo.xml">
       <SubType>compile</SubType>
     </None>
+    <None Include="Debug\APP\APP.d">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\ATM_ECU.eep">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\ATM_ECU.elf">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\ATM_ECU.hex">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\ATM_ECU.lss">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\ATM_ECU.map">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\ATM_ECU.srec">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\HAL\button\button_program.d">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\HAL\button\button_program.o">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\HAL\keypad\KEYPAD_program.d">
+      <SubType>compile</SubType>
+    </None>
     <None Include="Debug\HAL\lcd\LCD_program.d">
       <SubType>compile</SubType>
     </None>
     <None Include="Debug\HAL\lcd\LCD_program.o">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\main.d">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Debug\main.o">
       <SubType>compile</SubType>
     </None>
     <None Include="Debug\makedep.mk">

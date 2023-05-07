@@ -139,6 +139,18 @@
     <Compile Include="APP\APP.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="HAL\button\button_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\button\button_interface.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\button\button_private.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\button\button_program.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="HAL\eeprom\EEPROM_config.h">
       <SubType>compile</SubType>
     </Compile>
@@ -246,6 +258,7 @@
     <Folder Include="Debug\SERVICE\" />
     <Folder Include="HAL\lcd" />
     <Folder Include="HAL\eeprom" />
+    <Folder Include="HAL\button" />
     <Folder Include="MCAL" />
     <Folder Include="HAL" />
     <Folder Include="APP" />

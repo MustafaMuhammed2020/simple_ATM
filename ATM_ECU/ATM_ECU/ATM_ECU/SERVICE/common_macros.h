@@ -30,7 +30,7 @@
 #define cir_left(byte,bits) (byte = (byte << bits) | (byte >> (8-bits)))
 
 /*macro to display a specific flag*/
-#define get_bit(byte,flag_num) (byte = (byte >> flag_num) & 0X01)
+#define get_bit(byte,flag_num) (byte = ((byte >> flag_num) & 0X01))
 
 
 

@@ -30,7 +30,7 @@
 #define R1           DIO_PIN2                  
 #define R2           DIO_PIN3                   
 #define R3           DIO_PIN4                   
-
+#define R4           DIO_PIN0
 
 #define C1           DIO_PIN5                   
 #define C2           DIO_PIN6                  

@@ -8,7 +8,6 @@
 #ifndef APP_H_
 #define APP_H_
 
-#include "../SERVICE/standard_types.h"
 
 /** FIRST ADDRESS OF PIN IN EEPROM **/
 #define CARD_PINADDRESS_0   0x0311
@@ -39,5 +38,8 @@ void APP_storecard(void);
 
 /** FUNCTION TO READ CARD DATA FROM EEPROM **/
 void APP_getcarddata(void);
+
+/** FUNCTION TO SEND TRIGGER TO ATM ECU **/
+APP_sendtrigger();
 
 #endif /* APP_H_ */
