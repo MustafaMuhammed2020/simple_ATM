@@ -1,0 +1,23 @@
+﻿------ Build started: Project: ATM_ECU, Configuration: Debug AVR ------
+Build started.
+Project "ATM_ECU.cproj" (default targets):
+Target "PreBuildEvent" skipped, due to false condition; ('$(PreBuildEvent)'!='') was evaluated as (''!='').
+Target "CoreBuild" in file "C:\Program Files (x86)\Atmel\Studio\7.0\Vs\Compiler.targets" from project "E:\sprints_tasks\ATM\ATM_ECU\ATM_ECU\ATM_ECU\ATM_ECU.cproj" (target "Build" depends on it):
+	Task "RunCompilerTask"
+		Shell Utils Path C:\Program Files (x86)\Atmel\Studio\7.0\shellUtils
+		C:\Program Files (x86)\Atmel\Studio\7.0\shellUtils\make.exe all --jobs 4 --output-sync 
+		make: Nothing to be done for 'all'.
+	Done executing task "RunCompilerTask".
+	Task "RunOutputFileVerifyTask"
+				Program Memory Usage 	:	3938 bytes   12.0 % Full
+				Data Memory Usage 		:	157 bytes   7.7 % Full
+				Warning: Memory Usage estimation may not be accurate if there are sections other than .text sections in ELF file
+	Done executing task "RunOutputFileVerifyTask".
+Done building target "CoreBuild" in project "ATM_ECU.cproj".
+Target "PostBuildEvent" skipped, due to false condition; ('$(PostBuildEvent)' != '') was evaluated as ('' != '').
+Target "Build" in file "C:\Program Files (x86)\Atmel\Studio\7.0\Vs\Avr.common.targets" from project "E:\sprints_tasks\ATM\ATM_ECU\ATM_ECU\ATM_ECU\ATM_ECU.cproj" (entry point):
+Done building target "Build" in project "ATM_ECU.cproj".
+Done building project "ATM_ECU.cproj".
+
+Build succeeded.
+========== Build: 1 succeeded or up-to-date, 0 failed, 0 skipped ==========

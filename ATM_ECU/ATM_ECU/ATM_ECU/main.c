@@ -15,6 +15,8 @@ int main(void)
 	
 	APP_startcardcomm();  /** START **/ 
 	
+	//APP_pinvalidate(); /** VALIDATE USER INPUT **/
+	
 	APP_getamount(); /** GET NEEDED MONEY **/
 
 

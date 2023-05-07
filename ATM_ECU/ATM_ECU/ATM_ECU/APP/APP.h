@@ -20,4 +20,7 @@ void APP_startcardcomm(void);
 /** FUNCTION TO GET THE AMOUNT OF MONEY NEEDED **/
 void APP_getamount();
 
+/** FUNCTION TO VERIFY USER PIN **/
+//void APP_pinvalidate();
+
 #endif /* APP_H_ */
