@@ -211,7 +211,7 @@ void APP_getamount()
 		
 		u8_returnstatus = KEYPAD_readFail; /** REINITIALIZE STATE TO ACCEPT NEW NUMBER **/
 	}
-	TMR0_delayms(50);
+
 }
 
 /** FUNCTION TO VALIDATE THE CARD DATA **/
@@ -246,6 +246,21 @@ void APP_cardvalidate(void)
 			LCD_writestr("CARD IS STOLEN");
 		}
 		
+		/** CHECK IF NEEDED AMOUNT MORE THAN THE TRANSACTION AMOUNT **/
+		else if (u16_g_amount > MAX_AMOUNT) /** MAX AMOUNT FOR EACH TRANSACTION IS 5000 **/
+		{
+			LCD_sendcmd(LCD_CLEAR);
+			TMR0_delayms(20);
+			
+			LCD_goto(0 , 0);
+			LCD_writestr("MAX TRANSACTION ");
+			
+			LCD_goto(1 , 0);
+			LCD_writestr("AMOUNT EXCEEDED");
+			
+			TMR0_delayms(1000);
+		}
+		
 		/** CHECK IF BALANCE IS ENOUGH **/
 		else if (database[u8_l_cardnum].f_a_cardbalance < u16_g_amount)
 		{
@@ -257,24 +272,6 @@ void APP_cardvalidate(void)
 			
 			LCD_goto(1,3);
 			LCD_writestr("FUND");
-		}
-		
-		else if (database[u8_l_cardnum].f_a_cardbalance > u16_g_amount)
-		{
-			/** CHECK IF NEEDED AMOUNT MORE THAN THE TRANSACTION AMOUNT **/
-			if (u16_g_amount > MAX_AMOUNT) /** MAX AMOUNT FOR EACH TRANSACTION IS 5000 **/
-			{
-				LCD_sendcmd(LCD_CLEAR);
-				TMR0_delayms(20);
-				
-				LCD_goto(0 , 0);
-				LCD_writestr("MAX TRANSACTION ");
-				
-				LCD_goto(1 , 0);
-				LCD_writestr("AMOUNT EXCEEDED");
-				
-				TMR0_delayms(1000);
-			}
 		}
 		
 		else

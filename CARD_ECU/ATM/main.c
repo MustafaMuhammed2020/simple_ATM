@@ -87,10 +87,10 @@ int main(void)
 		APP_sendcarddata(); /** START THE COMMUNICATION & SEND CARD DATA **/
 	}
 	
-    while (1) 
-    {
-		
-    }
+//     while (1) 
+//     {
+// 		
+//     }
 
 	}
 
