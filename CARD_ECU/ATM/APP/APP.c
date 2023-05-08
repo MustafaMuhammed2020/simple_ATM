@@ -61,16 +61,57 @@ void APP_init()
 	DIO_setpinvalue(DIO_PORTA , DIO_PIN0 , DIO_PIN_LOW);  /** PIN IS LOW (TRIGGER OFF)      **/
 }
 
-/** FUNCTION TO PROGRAM THE CARD DATA **/
-void APP_cardprogram()
+/** FUNCTION TO SET THE ENTRY POINT USER / PROGRAMMING OR REPROGRAMMING MODE **/
+uint8_t APP_entrypoint()
 {
+	uint8_t u8_l_eepromcheck = 0 , u8_l_returnmode = 0 , u8_receiveddata = 0;
+	
+	EEPROM_readbyte(TEST_ADDRESS , &u8_l_eepromcheck , PAGE_0); /** READ THE FIRST BYTE WHICH WE WRITE TO  **/
+	
+	if (u8_l_eepromcheck == 0xFF) /** IF THE ADDRESS IS EMPTY **/
+	{
+		UART_sendstr("\r\n First insertion for this card wait to program it\r\n");
+		
+		u8_l_returnmode = PROGRAM_MODE ; /** RETURN THE PROGRAMMING MODE **/
+	}
+	
+	else if(u8_l_eepromcheck == TEST_DATA) /** CARD PROGRAMMED PREVIOUSLY **/
+	{
+		UART_sendstr("\r\nTo reprogram your card press 2 , for user mode press 1 \r\n");
+		
+		UART_receivechar(&u8_receiveddata);
+		
+		if (u8_receiveddata == '2')
+		{
+			u8_l_returnmode = REPROGRAM_MODE ; /** RETURN THE REPROGRAMMING MODE **/ 
+		}
+		
+		else if (u8_receiveddata == '1')
+		{
+			u8_l_returnmode = USER_MODE ; /** RETURN THE USER MODE **/
+		}
+		
+		else 
+		{
+			UART_sendstr("\r\nNot valid choice\r\n");
+		}
+	}
+	
+	return u8_l_returnmode ; /** RETURN THE FINAL MODE **/
+}
+
+
+/** FUNCTION TO PROGRAM THE CARD DATA **/
+uint8_t APP_cardprogram()
+{
+	uint8_t u8_a_cardstatus = CARD_NOT_OK ;
+	
 	/** PIN NUMBER ITERATOR , CHARACTER FOUND STATUS , COUNTER FOR PIN ATTEMPTS **/
 	uint8_t u8_a_num = 0 , u8_character = 0 , u8_a_try = 0; 
 	
 	/************************************************************************/
 	/**                     PROGRAMMING THE CARD                           **/
 	/************************************************************************/
-	//uint8_t u8_a_try = 0 ; /** COUNTER FOR PIN ATTEMPTS **/
 	
 	UART_sendstr("\r\n          you are in the programming mode\r\n"); /** MESSAGE **/
 	
@@ -89,7 +130,7 @@ void APP_cardprogram()
 		while(u8_a_num < 4)
 		{
 			/** VALIDATE THE USER INPUT AS NUMBERS ONLY **/
-			if (!((u8_g_cardpin[u8_a_num] > 47) && (u8_g_cardpin[u8_a_num] < 57)))
+			if (!((u8_g_cardpin[u8_a_num] >= 47) && (u8_g_cardpin[u8_a_num] <= 57)))
 			{
 				u8_character = 1 ; /** CHARACTER FOUND **/
 			}
@@ -101,14 +142,11 @@ void APP_cardprogram()
 		if (u8_a_notmatched == 0 && u8_character == 0) /** IF PIN MATCHED AND NO CHARACTERS **/
 		{
 			UART_sendstr("\r\nData received successfully\r\n");
+			u8_a_cardstatus = CARD_OK ;
 			break ;
 		}
-		u8_a_num = 0 ; /** REINITIALIZE ITERATOR AND CHARACTER STATUS TO 0 AGAIN **/
-		u8_character = 0 ;
-
-		u8_a_try++ ; /** NEXT TRY **/
 		
-		if(u8_a_try >= 1) /** NOT THE FIRST MESSAGE **/
+		else /** TRY FAILED **/
 		{
 			if (u8_character == 1) /** USER ENTERED CHARACTER **/
 			{
@@ -119,12 +157,30 @@ void APP_cardprogram()
 				UART_sendstr("\r\nPIN didn't match !\r\n");/** ASK USER TO INTER CARD PIN **/
 			}
 		}
+		
+    	u8_a_try++ ; /** NEXT TRY **/
+		u8_a_num = 0 ; /** REINITIALIZE ITERATOR AND CHARACTER STATUS TO 0 AGAIN **/
+		u8_character = 0 ;
+		
 	}
+	
+	return u8_a_cardstatus ; /** RETURN THE CARD STATUS **/
+}
+
+/** FUNCTION FOR CARD PROGRAMMING FAILURE **/
+void APP_cardfailed()
+{
+	/** DISPLAY MESSAGE WHEN CARD PROGRAMMING FAILS **/
+	UART_sendstr("\r\n Sorry card programming failed\r\n");
 }
 
 /** FUNCTION TO STORE CARD DATA IN THE EEPROM **/
 void APP_storecard()
 {
+	/** STORE THE TEST DATA IN THE EEPROM **/
+	EEPROM_writebyte(TEST_ADDRESS , TEST_DATA , PAGE_0 );
+	
+	
 	/** STORE PIN NUMBER **/
 	for (uint16_t pin_counter = 0x0000 ; pin_counter < 0x0004 ; pin_counter++)
 	{

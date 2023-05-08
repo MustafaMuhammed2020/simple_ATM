@@ -8,6 +8,18 @@
 #ifndef APP_H_
 #define APP_H_
 
+/** MACROS FOR THE CARD RETURN STATUS **/
+#define CARD_OK      1
+#define CARD_NOT_OK  0
+
+/** MACRO FOR TESTING ADDRESS AND TEST DATA **/
+#define TEST_ADDRESS 0x0310
+#define TEST_DATA    0x12
+
+/** MACROS FOR CARD DIFFERENT MODES **/
+#define PROGRAM_MODE    0
+#define USER_MODE       1
+#define REPROGRAM_MODE  2
 
 /** FIRST ADDRESS OF PIN IN EEPROM **/
 #define CARD_PINADDRESS_0   0x0311
@@ -23,15 +35,21 @@
 #define CARD_PANADDRESS_0  0x0319
 
 
-				 
+	 
 /** FUNCTION FOR INITIALIZATION **/
 void APP_init(void);
+
+/** FUNCTION TO SET THE ENTRY POINT USER / PROGRAMMING OR REPROGRAMMING MODE **/
+uint8_t APP_entrypoint();
 
 /** FUNCTION TO SEND CARD DATA TO ATM ECU **/
 void APP_sendcarddata() ;
 
 /** FUNCTION TO PROGRAM THE CARD DATA **/
-void APP_cardprogram(void);
+uint8_t APP_cardprogram(void);
+
+/** FUNCTION FOR CARD PROGRAMMING FAILURE **/
+void APP_cardfailed();
 
 /** FUNCTION TO STORE CARD DATA IN THE EEPROM **/ 
 void APP_storecard(void);
