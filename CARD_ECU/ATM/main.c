@@ -4,8 +4,6 @@
 /* Version : V02                                  */
 /* Hint    : Card_ECU                             */
 /**************************************************/
-//#include <stdlib.h>
-//#include <stdio.h>
 
 #include "SERVICE/standard_types.h"
 
@@ -32,7 +30,7 @@ int main(void)
 			/** DISPLAY A MESSAGE TO GET OUT OF THE SYSTEM **/
 			APP_cardfailed();
 			
-			exit(1); /** STOP THE SYSTEM **/
+			exit(0); /** STOP THE SYSTEM **/
 		}
 		
 		APP_storecard();   /** STORE CARD DATA IN EEPROM **/
@@ -86,7 +84,7 @@ int main(void)
 			Is_pressed(BUTTON1_PORT , BUTTON1_PIN , &u8_a_commtrig);
 		} while (u8_a_commtrig == 0); /** UNTILL COMMUNICATION INITIATED **/
 			
-		APP_sendcarddata(); /** START THE **/
+		APP_sendcarddata(); /** START THE COMMUNICATION & SEND CARD DATA **/
 	}
 	
 //     while (1) 

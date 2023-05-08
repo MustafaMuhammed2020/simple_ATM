@@ -94,6 +94,7 @@ uint8_t APP_entrypoint()
 		else 
 		{
 			UART_sendstr("\r\nNot valid choice\r\n");
+			exit(0);
 		}
 	}
 	
@@ -179,7 +180,22 @@ void APP_storecard()
 {
 	/** STORE THE TEST DATA IN THE EEPROM **/
 	EEPROM_writebyte(TEST_ADDRESS , TEST_DATA , PAGE_0 );
+	TMR0_delayms(40);
 	
+	/** STORE THE TEST DATA IN THE EEPROM **/
+	//EEPROM_writebyte(0x0150 , 0x34 , PAGE_0 );
+	
+// 	EEPROM_writebyte(CARD_PINADDRESS_0 , u8_g_cardpin[0] , PAGE_0 );
+// 	TMR0_delayms(40);
+// 	
+// 	EEPROM_writebyte(CARD_PINADDRESS_1 , u8_g_cardpin[1] , PAGE_0 );
+// 	TMR0_delayms(40);
+// 	
+// 	EEPROM_writebyte(CARD_PINADDRESS_2 , u8_g_cardpin[2] , PAGE_0 );
+// 	TMR0_delayms(40);
+// 	
+// 	EEPROM_writebyte(CARD_PINADDRESS_3 , u8_g_cardpin[3] , PAGE_0 );
+// 	TMR0_delayms(40);
 	
 	/** STORE PIN NUMBER **/
 	for (uint16_t pin_counter = 0x0000 ; pin_counter < 0x0004 ; pin_counter++)
@@ -204,14 +220,14 @@ void APP_getcarddata(void)
 	for (uint16_t counter = 0x0000 ; counter < 0x0004 ; counter++)
 	{
 		EEPROM_readbyte(CARD_PINADDRESS_0+counter , &readpin[counter] , PAGE_0 );
-		TMR0_delayms(20);
+		TMR0_delayms(40);
 	}
 	
 	/** GET PAN FROM THE EEPROM **/ 
 	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
 	{
 		EEPROM_readbyte(CARD_PANADDRESS_0+pan_counter , &readpan[pan_counter] , PAGE_0 );
-		TMR0_delayms(20);
+		TMR0_delayms(40);
 	}	
 }
 
@@ -224,9 +240,11 @@ APP_sendtrigger()
 /** FUNCTION TO SEND CARD DATA TO ATM ECU **/
 void APP_sendcarddata() 
 {
+	TMR0_delayms(30);
+	
  	SPI_masterinittransmit(); /** START SPI TRANSMISSION **/
  	
- 	SPI_sendstring(u8_g_cardpin); /** SEND STORED PIN TO ATM **/
+ 	SPI_sendstring(readpin); /** SEND STORED PIN TO ATM **/
 	
 	SPI_masterendtransmit(); /** END TRANSMISSION **/
 	
@@ -234,7 +252,7 @@ void APP_sendcarddata()
 	
 	SPI_masterinittransmit(); /** START SPI TRANSMISSION **/
 	
-	SPI_sendstring(u8_g_cardpan); /** SEND STORED PIN TO ATM **/
+	SPI_sendstring(readpan); /** SEND STORED PIN TO ATM **/
 	
 	SPI_masterendtransmit();/** END TRANSMISSION **/
    

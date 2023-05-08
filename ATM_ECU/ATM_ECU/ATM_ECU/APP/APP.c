@@ -122,9 +122,11 @@ void APP_startcardcomm()
 	/** INITIATE COMMUNICATION BETWEEN THE CARD ECU VIA TRIGGER ACTION **/
 	DIO_setpinvalue(DIO_PORTB , DIO_PIN0 , DIO_PIN_HIGH);
 	
-	SPI_receivestring(&u8_g_cardpin); /** RECEIVE THE PIN **/
 	TMR0_delayms(30);
 	
+	SPI_receivestring(&u8_g_cardpin); /** RECEIVE THE PIN **/
+	TMR0_delayms(30);
+
 	SPI_receivestring(&u8_g_cardpan); /** RECEIVE THE PAN **/
 	
 	/** VERIFY THE USER INSERTED PIN **/
@@ -251,27 +253,30 @@ void APP_cardvalidate(void)
 			TMR0_delayms(20);
 			
 			LCD_goto(0,1);
-			LCD_writestr("INSUFFICIENT FUND");
+			LCD_writestr("INSUFFICIENT ");
 			
 			LCD_goto(1,3);
 			LCD_writestr("FUND");
 		}
 		
-		/** CHECK IF NEEDED AMOUNT MORE THAN THE TRANSACTION AMOUNT **/
-		else if (u16_g_amount > MAX_AMOUNT) /** MAX AMOUNT FOR EACH TRANSACTION IS 5000 **/
+		else if (database[u8_l_cardnum].f_a_cardbalance > u16_g_amount)
 		{
-			LCD_sendcmd(LCD_CLEAR);
-			TMR0_delayms(20);
-			
-			LCD_goto(0 , 0);
-			LCD_writestr("MAX TRANSACTION ");
-			
-			LCD_goto(1 , 0);
-			LCD_writestr("AMOUNT EXCEEDED");
-			
-			TMR0_delayms(1000);
+			/** CHECK IF NEEDED AMOUNT MORE THAN THE TRANSACTION AMOUNT **/
+			if (u16_g_amount > MAX_AMOUNT) /** MAX AMOUNT FOR EACH TRANSACTION IS 5000 **/
+			{
+				LCD_sendcmd(LCD_CLEAR);
+				TMR0_delayms(20);
+				
+				LCD_goto(0 , 0);
+				LCD_writestr("MAX TRANSACTION ");
+				
+				LCD_goto(1 , 0);
+				LCD_writestr("AMOUNT EXCEEDED");
+				
+				TMR0_delayms(1000);
+			}
 		}
-
+		
 		else
 		{
 			LCD_sendcmd(LCD_CLEAR);

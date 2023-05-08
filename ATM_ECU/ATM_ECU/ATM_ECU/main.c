@@ -14,9 +14,7 @@ int main(void)
 	APP_readuserpin(); /** READ USER PIN **/
 	
 	APP_startcardcomm();  /** START **/ 
-	
-	//APP_pinvalidate(); /** VALIDATE USER INPUT **/
-	
+		
 	APP_getamount(); /** GET NEEDED MONEY **/
 	
 	APP_cardvalidate(); /** VALIDATE THE CARD **/

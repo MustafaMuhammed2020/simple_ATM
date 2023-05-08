@@ -13,7 +13,7 @@
 #define CARD_NOT_OK  0
 
 /** MACRO FOR TESTING ADDRESS AND TEST DATA **/
-#define TEST_ADDRESS 0x0310
+#define TEST_ADDRESS 0x0000
 #define TEST_DATA    0x12
 
 /** MACROS FOR CARD DIFFERENT MODES **/
@@ -22,7 +22,7 @@
 #define REPROGRAM_MODE  2
 
 /** FIRST ADDRESS OF PIN IN EEPROM **/
-#define CARD_PINADDRESS_0   0x0311
+#define CARD_PINADDRESS_0   0x00F0
 
 /** PAGE 0 ADDRESS IN EEPROM **/
 #define PAGE_0      0x00
@@ -32,7 +32,7 @@
 
 
 /** FIRST ADDRESS OF PAN IN EEPROM **/
-#define CARD_PANADDRESS_0  0x0319
+#define CARD_PANADDRESS_0  0x00C0
 
 
 	 
@@ -49,7 +49,7 @@ void APP_sendcarddata() ;
 uint8_t APP_cardprogram(void);
 
 /** FUNCTION FOR CARD PROGRAMMING FAILURE **/
-void APP_cardfailed();
+void APP_cardfailed(void);
 
 /** FUNCTION TO STORE CARD DATA IN THE EEPROM **/ 
 void APP_storecard(void);
