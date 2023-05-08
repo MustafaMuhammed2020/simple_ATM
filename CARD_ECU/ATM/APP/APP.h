@@ -40,10 +40,10 @@
 void APP_init(void);
 
 /** FUNCTION TO SET THE ENTRY POINT USER / PROGRAMMING OR REPROGRAMMING MODE **/
-uint8_t APP_entrypoint();
+uint8_t APP_entrypoint(void);
 
 /** FUNCTION TO SEND CARD DATA TO ATM ECU **/
-void APP_sendcarddata() ;
+void APP_sendcarddata(void) ;
 
 /** FUNCTION TO PROGRAM THE CARD DATA **/
 uint8_t APP_cardprogram(void);

@@ -18,8 +18,6 @@ int main(void)
 	APP_getamount(); /** GET NEEDED MONEY **/
 	
 	APP_cardvalidate(); /** VALIDATE THE CARD **/
-
-
 	
 // 	while (1)
 // 	{

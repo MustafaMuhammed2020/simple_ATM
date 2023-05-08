@@ -26,7 +26,7 @@ typedef struct{
 	} CARD; 
 
 /** ARRAY FOR CARDS **/
-CARD database[3] = { { 10000.00 , BLOCKED , "1234567890123214567"}, 
+CARD database[3] = { { 6000.00 , BLOCKED , "1234567890123214567"}, 
                      { 10000.00 , RUNNING , "1234567890123456789"},
 					 { 9000.00 , RUNNING , "1001355678200976512"} };
 

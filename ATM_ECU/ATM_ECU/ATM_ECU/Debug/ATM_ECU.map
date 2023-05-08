@@ -887,26 +887,26 @@ END GROUP
  .debug_frame   0x00000314       0xb4 MCAL/spi/SPI_program.o
  .debug_frame   0x000003c8       0x64 MCAL/timer0/TMR0_program.o
 
-.debug_str      0x00000000      0xb59
+.debug_str      0x00000000      0xb89
  *(.debug_str)
  .debug_str     0x00000000      0x196 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega32a/avr5/crtatmega32a.o
- .debug_str     0x00000196      0x3e7 APP/APP.o
-                                0x40f (size before relaxing)
- .debug_str     0x0000057d       0xb1 HAL/button/button_program.o
+ .debug_str     0x00000196      0x3e4 APP/APP.o
+                                0x40c (size before relaxing)
+ .debug_str     0x0000057a       0xe4 HAL/button/button_program.o
                                 0x22c (size before relaxing)
- .debug_str     0x0000062e       0x1f HAL/buzzer/buzzer_program.o
+ .debug_str     0x0000065e       0x1f HAL/buzzer/buzzer_program.o
                                 0x195 (size before relaxing)
- .debug_str     0x0000064d       0xa9 HAL/keypad/KEYPAD_program.o
+ .debug_str     0x0000067d       0xa9 HAL/keypad/KEYPAD_program.o
                                 0x26d (size before relaxing)
- .debug_str     0x000006f6       0xe2 HAL/lcd/LCD_program.o
+ .debug_str     0x00000726       0xe2 HAL/lcd/LCD_program.o
                                 0x2c6 (size before relaxing)
- .debug_str     0x000007d8       0x11 main.o
-                                0x139 (size before relaxing)
- .debug_str     0x000007e9      0x12b MCAL/dio/DIO_program.o
+ .debug_str     0x00000808       0x11 main.o
+                                0x136 (size before relaxing)
+ .debug_str     0x00000819      0x12b MCAL/dio/DIO_program.o
                                 0x2e8 (size before relaxing)
- .debug_str     0x00000914       0xee MCAL/spi/SPI_program.o
+ .debug_str     0x00000944       0xee MCAL/spi/SPI_program.o
                                 0x271 (size before relaxing)
- .debug_str     0x00000a02      0x157 MCAL/timer0/TMR0_program.o
+ .debug_str     0x00000a32      0x157 MCAL/timer0/TMR0_program.o
                                 0x2e1 (size before relaxing)
 
 .debug_loc      0x00000000      0xfb0

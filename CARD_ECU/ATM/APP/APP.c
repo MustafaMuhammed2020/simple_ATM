@@ -182,21 +182,6 @@ void APP_storecard()
 	EEPROM_writebyte(TEST_ADDRESS , TEST_DATA , PAGE_0 );
 	TMR0_delayms(40);
 	
-	/** STORE THE TEST DATA IN THE EEPROM **/
-	//EEPROM_writebyte(0x0150 , 0x34 , PAGE_0 );
-	
-// 	EEPROM_writebyte(CARD_PINADDRESS_0 , u8_g_cardpin[0] , PAGE_0 );
-// 	TMR0_delayms(40);
-// 	
-// 	EEPROM_writebyte(CARD_PINADDRESS_1 , u8_g_cardpin[1] , PAGE_0 );
-// 	TMR0_delayms(40);
-// 	
-// 	EEPROM_writebyte(CARD_PINADDRESS_2 , u8_g_cardpin[2] , PAGE_0 );
-// 	TMR0_delayms(40);
-// 	
-// 	EEPROM_writebyte(CARD_PINADDRESS_3 , u8_g_cardpin[3] , PAGE_0 );
-// 	TMR0_delayms(40);
-	
 	/** STORE PIN NUMBER **/
 	for (uint16_t pin_counter = 0x0000 ; pin_counter < 0x0004 ; pin_counter++)
 	{
