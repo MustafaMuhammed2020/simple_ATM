@@ -23,13 +23,16 @@
 #include "../HAL/buzzer/buzzer_interface.h"
 #include "../HAL/buzzer/buzzer_config.h"
 
+#include "../SERVICE/data_base.h" /** DATA BASE FILE **/
+
 /** INCLUDE LAYER FILES **/
 #include "APP.h"
 
 uint8_t u8_g_cardpin[5] = "0000";                  /** GLOBAL VARIABLE TO HOLD THE CARD PIN     **/
 uint8_t u8_g_cardpan[20] = "0000000000000000000";  /** GLOBAL VARIABLE TO HOLD THE CARD PAN     **/
-
 uint8_t u8_g_userpin[5] = "0000"; /** GLOBAL VARIABLE TO GET USER PIN **/
+
+uint8_t u8_g_bell[8] =  { 0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00}; /** BELL SHAPE PATTERN **/
 
 uint8_t u8_a_pressednum = 0 ; /** VARIABLE TO STORE THE PRESSED NUM FROM KEYPAD **/
 
@@ -37,11 +40,11 @@ KEYPAD_readError u8_returnstatus = KEYPAD_readFail ; /** VARIABLE FOR KEYPAD STA
 
 uint8_t counter , number = 0 , status = 0 , u8_a_pintry = 0 , u8_a_pinnotmatched = 1 , triggerstatus = 0;
 
+uint16_t u16_g_amount = 0 ; /** AMOUNT NEEDED BY USER **/
 
 /** INITIALIZATION FUNCTION **/
 void APP_init()
 {
-	//Button_init(BUTTON1_PORT , BUTTON1_PIN); /** ZERO/SET BUTTON **/
 	Button_init(BUTTON2_PORT , BUTTON2_PIN); /** START TRIGGER FROM CARD ECU **/
 	
 	BUZZ_init(); /** ALARM INITIALIZATION **/
@@ -58,6 +61,8 @@ void APP_init()
 	
 	LCD_init();  /** INITIALIZE LCD **/
 	TMR0_delayms(20); /** SET DELAY FOR LCD INITILIZATION **/
+	
+	LCD_writecustomchar(u8_g_bell , bell); /** STORE THE BELL SHAPE IN CGRAM OF LCD **/
 	
 	LCD_writestr(" WELCOME TO ATM !"); /** DISPLAY WELCOME MESSAGE FOR 1 SEC **/
 	TMR0_delayms(500);
@@ -85,14 +90,14 @@ void APP_readuserpin()
 	LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
 	TMR0_delayms(20);
 	
-	LCD_goto(0 , 1);
+	LCD_goto(0 , 0);
 	LCD_writestr("Enter Your PIN"); /** SAK USER TO INSERT CARD PIN **/
 	
 	for(counter = 0 ; counter < 4 ; counter++)
 	{
 		while ((KEYPAD_read(&u8_a_pressednum) == KEYPAD_readFail)); /** POLLING UNTILL NUMBER PRESSED **/
 		
-		LCD_goto(1 , counter); /** DISPLAY * WITH EACH PRESSED NUMBER **/
+		LCD_goto(1 , counter+4); /** DISPLAY * WITH EACH PRESSED NUMBER **/
 		LCD_writechar('*');
 		
 		u8_g_userpin[counter] = u8_a_pressednum ; /** STORE THE PRESSED NUMBER **/
@@ -178,11 +183,11 @@ void APP_getamount()
 	
 	LCD_goto(1,2);
 
-	for(counter = 0 ; counter <= 6 ; counter++)
+	for(counter = 0 ; counter <= AMOUNT_DIGITS ; counter++)
 	{
 		u8_a_pressednum = KEYPAD_readFail ;
 		
-		if (counter == 4)
+		if (counter == DECIMEL_POS)
 		{
 			LCD_writechar('.'); /** DECIMEL POINT **/
 			u8_returnstatus = KEYPAD_readFail; /** REINITIALIZE STATE TO ACCEPT NEW NUMBER **/
@@ -194,30 +199,128 @@ void APP_getamount()
 		TMR0_delayms(200);
 		LCD_writechar(u8_a_pressednum);
 		
-		if (counter < 4)
+		if (counter < DECIMEL_POS) 
 		{
 			u16_l_amout += (u8_a_pressednum - 48) * u8_a_pos ; /** CHARACTER TO INTEGER **/
 			u8_a_pos /= 10 ; /** GO TO THE NEXT POSITION **/
 		}
 		
+		u16_g_amount = u16_l_amout ; /** STORE THE NEEDED AMOUNT GLOBALLY **/
+		
 		u8_returnstatus = KEYPAD_readFail; /** REINITIALIZE STATE TO ACCEPT NEW NUMBER **/
 	}
+	TMR0_delayms(50);
+}
+
+/** FUNCTION TO VALIDATE THE CARD DATA **/
+void APP_cardvalidate(void)
+{
+	uint8_t u8_l_cards = 0  , u8_l_panstate = 1 , u8_l_cardnum = 0; /** COUNTER FOR NUMBER OF CARDS **/
 	
-	TMR0_delayms(100);
-	
-	if (u16_l_amout > 5000)
+	for (u8_l_cards = 0 ; u8_l_cards < NUMBER_OF_CARDS ; u8_l_cards++)
 	{
+		/** VALIDATING CARD PAN **/
+		u8_l_panstate = strcmp(database[u8_l_cards].u8_a_card_pan , u8_g_cardpan);
+		
+		if (!u8_l_panstate) /** PAN FOUND IN THE DATABASE **/
+		{
+			u8_l_cardnum = u8_l_cards ; /** GET THE CARD INDEX IN THE DATABASE **/ 
+			break ; 
+		}
+	}
+	
+	if (!u8_l_panstate) /** CONTINUE ONLY IF THE CARD IS FOUND IN THE DATABASE **/
+	{
+		/** CHECK IF THE CARD RUNNING / BLOCKED **/
+		if(database[u8_l_cardnum].en_a_cardstatus == BLOCKED)
+		{
+			BUZZ_on();  /** ALARM IS ON **/
+			
+			/** DISPLAY STATUS OVER THE LCD **/
+			LCD_sendcmd(LCD_CLEAR);
+			TMR0_delayms(20);
+			
+			LCD_goto(0,0);
+			LCD_writestr("CARD IS STOLEN");
+		}
+		
+		/** CHECK IF BALANCE IS ENOUGH **/
+		else if (database[u8_l_cardnum].f_a_cardbalance < u16_g_amount)
+		{
+			LCD_sendcmd(LCD_CLEAR);
+			TMR0_delayms(20);
+			
+			LCD_goto(0,1);
+			LCD_writestr("INSUFFICIENT FUND");
+			
+			LCD_goto(1,3);
+			LCD_writestr("FUND");
+		}
+		
+		/** CHECK IF NEEDED AMOUNT MORE THAN THE TRANSACTION AMOUNT **/
+		else if (u16_g_amount > MAX_AMOUNT) /** MAX AMOUNT FOR EACH TRANSACTION IS 5000 **/
+		{
+			LCD_sendcmd(LCD_CLEAR);
+			TMR0_delayms(20);
+			
+			LCD_goto(0 , 0);
+			LCD_writestr("MAX TRANSACTION ");
+			
+			LCD_goto(1 , 0);
+			LCD_writestr("AMOUNT EXCEEDED");
+			
+			TMR0_delayms(1000);
+		}
+
+		else
+		{
+			LCD_sendcmd(LCD_CLEAR);
+			TMR0_delayms(20);
+			
+			LCD_goto(0,3);
+			LCD_writestr("APPROVED");
+			LCD_goto(1,3);
+			LCD_writestr("TRANSACTION");
+			
+			TMR0_delayms(1000);
+			
+			LCD_sendcmd(LCD_CLEAR);
+			TMR0_delayms(20);
+			
+			/** CALCULATE THE NEW BALANCE **/
+			database[u8_l_cardnum].f_a_cardbalance -= u16_g_amount ; 
+			
+			LCD_goto(0,0);
+			LCD_writestr("NEW BALANCE :");
+			LCD_goto(1,4);
+			LCD_writeint(database[u8_l_cardnum].f_a_cardbalance);
+			
+			TMR0_delayms(1000);
+			
+			LCD_sendcmd(LCD_CLEAR);
+			TMR0_delayms(20);
+			LCD_goto(0,0);
+			LCD_writestr("EJECTING CARD");
+		}
+		
+	}
+	
+	else
+	{
+		BUZZ_on();  /** ALARM IS ON **/
+		
+		/** DISPLAY STATUS OVER THE LCD **/
 		LCD_sendcmd(LCD_CLEAR);
 		TMR0_delayms(20);
 		
-		LCD_goto(0 , 0);
-		LCD_writestr("MAX TRANSACTION ");
+		LCD_goto(0,0);
+		LCD_writestr("THIS IS A");
+		LCD_goto(1,0);
+		LCD_writestr("FRAUD CARD");
 		
-		LCD_goto(1 , 0);
-		LCD_writestr("AMOUNT EXCEEDED");
-		
-		TMR0_delayms(1000);
+		/** DISPLAY BELL SHAPE **/
+		LCD_goto(0 , 15);
+		LCD_writechar(bell);
 	}
-	
 }
 

@@ -18,6 +18,8 @@ int main(void)
 	//APP_pinvalidate(); /** VALIDATE USER INPUT **/
 	
 	APP_getamount(); /** GET NEEDED MONEY **/
+	
+	APP_cardvalidate(); /** VALIDATE THE CARD **/
 
 
 	

@@ -8,6 +8,10 @@
 #ifndef APP_H_
 #define APP_H_
 
+#define bell  0 /** MACRO FOR BELL **/
+#define MAX_AMOUNT     5000
+#define DECIMEL_POS    4
+#define AMOUNT_DIGITS  6
 /** INITIALIZATION FUNCTION **/
 void APP_init(void);
 
@@ -18,7 +22,10 @@ void APP_readuserpin(void);
 void APP_startcardcomm(void);
 
 /** FUNCTION TO GET THE AMOUNT OF MONEY NEEDED **/
-void APP_getamount();
+void APP_getamount(void);
+
+/** FUNCTION TO VALIDATE THE CARD FROM THE DATABASE **/
+void APP_cardvalidate(void);
 
 /** FUNCTION TO VERIFY USER PIN **/
 //void APP_pinvalidate();

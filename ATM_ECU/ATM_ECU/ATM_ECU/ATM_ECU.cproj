@@ -244,6 +244,9 @@
     <Compile Include="SERVICE\common_macros.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="SERVICE\data_base.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="SERVICE\standard_types.h">
       <SubType>compile</SubType>
     </Compile>
