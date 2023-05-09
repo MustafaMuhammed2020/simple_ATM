@@ -12,6 +12,8 @@
 #define MAX_AMOUNT     5000
 #define DECIMEL_POS    4
 #define AMOUNT_DIGITS  6
+#define MAX_TRY        2
+
 /** INITIALIZATION FUNCTION **/
 void APP_init(void);
 

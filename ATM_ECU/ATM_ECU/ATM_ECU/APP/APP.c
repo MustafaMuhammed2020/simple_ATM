@@ -109,7 +109,7 @@ void APP_readuserpin()
 	do /** LONG PRESS FOR 2 SECONDS ON ZERO **/
 	{
 		KEYPAD_read(&status); /** READ THE ZERO FROM KEYPAD **/
-		TMR0_delayms(1000);   /** DELAY FOR 2000 SECONDS    **/
+		TMR0_delayms(940);   /** DELAY FOR 2000 SECONDS    **/
 		KEYPAD_read(&status); /** READ THE ZERO FROM KEYPAD **/
 		
 	} while (status != '0');
@@ -131,7 +131,7 @@ void APP_startcardcomm()
 	
 	/** VERIFY THE USER INSERTED PIN **/
 	u8_a_pinnotmatched = 1 ;
-	while (u8_a_pintry <= 1 && u8_a_pinnotmatched != 0  ) /** CHECK PIN MATCHING FOR TWO TIMES **/
+	while (u8_a_pintry <= MAX_TRY && u8_a_pinnotmatched != 0  ) /** CHECK PIN MATCHING FOR TWO TIMES **/
 	{
 		u8_a_pinnotmatched = strcmp(u8_g_cardpin , u8_g_userpin); /** COMPARE THE TWO PINs **/
 		
@@ -142,6 +142,8 @@ void APP_startcardcomm()
 		
 		else /** PIN NOT MATCHED **/
 		{
+			
+			
 			LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
 			TMR0_delayms(20);
 			
@@ -152,22 +154,26 @@ void APP_startcardcomm()
 			LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
 			TMR0_delayms(20);
 			
-			APP_readuserpin(); /** READ THE PIN AGAIN **/
-		}
-		
-		u8_a_pintry++ ; /** TRY FOR MORE ATTEMPT **/
-		
-		if (u8_a_pintry > 1)
-		{
-			while (1)
+			u8_a_pintry++ ; /** TRY FOR MORE ATTEMPT **/ /** 0 , 1 , 2 **/
+			
+			if (u8_a_pintry > MAX_TRY) /** WHEN THIRD TRY IS WRONG **/
 			{
-				BUZZ_on();
-				TMR0_delayms(500);
-				
-				BUZZ_off();
-				TMR0_delayms(500);
+				while (1)
+				{
+					LCD_goto(0,0);
+					LCD_writestr("PIN NOT MATCHED !"); /** DISPLAY MESSAGE **/
+					
+					BUZZ_on();
+					TMR0_delayms(500);
+					
+					BUZZ_off();
+					TMR0_delayms(500);
+				}
 			}
+			
+			APP_readuserpin(); /** READ THE PIN AGAIN **/ 
 		}
+		
 	}
 }
 

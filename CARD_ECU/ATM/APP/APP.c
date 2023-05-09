@@ -131,7 +131,7 @@ uint8_t APP_cardprogram()
 		while(u8_a_num < 4)
 		{
 			/** VALIDATE THE USER INPUT AS NUMBERS ONLY **/
-			if (!((u8_g_cardpin[u8_a_num] >= 47) && (u8_g_cardpin[u8_a_num] <= 57)))
+			if (!((u8_g_cardpin[u8_a_num] >= 48) && (u8_g_cardpin[u8_a_num] <= 57)))
 			{
 				u8_character = 1 ; /** CHARACTER FOUND **/
 			}
