@@ -11,7 +11,7 @@
 
 /** INCLUDE INTERFACE OF LOWER LAYERS **/
 #include "../../MCAL/dio/DIO_interface.h"
-
+#include "../../MCAL/dio/DIO_config.h"
 
 /** INCLUDE THE DRIVER FILES */
 #include "button_interface.h"

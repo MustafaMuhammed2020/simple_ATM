@@ -13,21 +13,11 @@
 
 /** INCLUDE INTERFACE FILES OF LOWER LAYERS **/
 #include "../MCAL/timer0/TMR0_interface.h"
-#include "../MCAL/timer0/TMR0_config.h"
-
-#include "../MCAL/dio/DIO_interface.h"
-
 #include "../MCAL/uart/UART_interface.h"
-
 #include "../MCAL/spi/SPI_interface.h"
 
-#include "../MCAL/i2c/I2C_interface.h"
-#include "../MCAL/i2c/I2C_config.h"
-
 #include "../HAL/lcd/LCD_interface.h"
-
 #include "../HAL/eeprom/EEPROM_interface.h"
-
 #include "../HAL/button/button_interface.h"
 #include "../HAL/button/button_config.h"
 
@@ -35,14 +25,14 @@
 /** INCLUDE LAYER FILES **/
 #include "APP.h"
 
-uint8_t u8_g_cardpin[5] = "0000";                  /** GLOBAL VARIABLE TO HOLD THE CARD PAN     **/ 
-uint8_t u8_g_cardpan[20] = "0000000000000000000";  /** GLOBAL VARIABLE TO HOLD THE CARD PIN     **/
-uint8_t u8_g_cardpinconfirm[5] = "0000";           /** GLOBAL VARIABLE TO HOLD PAN CONFIRMATION **/
+uint8_t u8_g_cardpin[PIN_NUM_SIZE] = "0000";                  /** GLOBAL VARIABLE TO HOLD THE CARD PAN     **/ 
+uint8_t u8_g_cardpan[PAN_NUM_SIZE] = "0000000000000000000";  /** GLOBAL VARIABLE TO HOLD THE CARD PIN     **/
+uint8_t u8_g_cardpinconfirm[PIN_NUM_SIZE] = "0000";           /** GLOBAL VARIABLE TO HOLD PAN CONFIRMATION **/
 
 uint8_t u8_a_notmatched = 0 ;
 
-uint8_t readpin[5] = "0000" ;
-uint8_t readpan[20] = "0000000000000000000";
+uint8_t readpin[PIN_NUM_SIZE] = "0000" ;
+uint8_t readpan[PAN_NUM_SIZE] = "0000000000000000000";
 
 /** FUNCTION FOR INITIALIZATION **/
 void APP_init()
@@ -68,7 +58,7 @@ uint8_t APP_entrypoint()
 	
 	EEPROM_readbyte(TEST_ADDRESS , &u8_l_eepromcheck , PAGE_0); /** READ THE FIRST BYTE WHICH WE WRITE TO  **/
 	
-	if (u8_l_eepromcheck == 0xFF) /** IF THE ADDRESS IS EMPTY **/
+	if (u8_l_eepromcheck == EMPTY_ADDRESS) /** IF THE ADDRESS IS EMPTY **/
 	{
 		UART_sendstr("\r\n First insertion for this card wait to program it\r\n");
 		
@@ -81,12 +71,12 @@ uint8_t APP_entrypoint()
 		
 		UART_receivechar(&u8_receiveddata);
 		
-		if (u8_receiveddata == '2')
+		if (u8_receiveddata == CARD_REPROGRAM) /** USER SELECTED PROGRAMMING MODE **/
 		{
 			u8_l_returnmode = REPROGRAM_MODE ; /** RETURN THE REPROGRAMMING MODE **/ 
 		}
 		
-		else if (u8_receiveddata == '1')
+		else if (u8_receiveddata == CARD_USE) /** USER SELECTED TO ENTER USER MODE **/
 		{
 			u8_l_returnmode = USER_MODE ; /** RETURN THE USER MODE **/
 		}
@@ -119,7 +109,7 @@ uint8_t APP_cardprogram()
 	UART_sendstr("Please enter card PAN\r\n"); /** ASK USER TO INTER CARD PAN **/
 	UART_receivestr(&u8_g_cardpan); /** RECEIVE PAN FROM USER **/
 	
-	while (u8_a_try <= 2) /** JUST TWO ATTEMPTS TO SET CARD PIN **/
+	while (u8_a_try <= MAX_PIN_ATTEMPT) /** JUST TWO ATTEMPTS TO SET CARD PIN **/
 	{
 		UART_sendstr("\r\nPlease enter new 4-numbers PIN\r\n");/** ASK USER TO INTER CARD PIN **/
 		UART_receivestr(&u8_g_cardpin);  /** RECEIVE PIN FROM USER **/
@@ -128,19 +118,19 @@ uint8_t APP_cardprogram()
 		UART_receivestr(&u8_g_cardpinconfirm); /** RECEIVE PIN CONFIRMATION **/
 		
 		/** CHECK IF CHARACTER ENTERED **/
-		while(u8_a_num < 4)
+		while(u8_a_num < PIN_SIZE)
 		{
-			/** VALIDATE THE USER INPUT AS NUMBERS ONLY **/
-			if (!((u8_g_cardpin[u8_a_num] >= 48) && (u8_g_cardpin[u8_a_num] <= 57)))
+			/** VALIDATE THE USER INPUT AS NUMBERS ONLY FROM 0 to 9 **/
+			if (!((u8_g_cardpin[u8_a_num] >= ZERO_ASCII) && (u8_g_cardpin[u8_a_num] <= NINE_ASCII)))
 			{
-				u8_character = 1 ; /** CHARACTER FOUND **/
+				u8_character = TRUE ; /** CHARACTER FOUND **/
 			}
 			u8_a_num++ ; /** JUMP TO THE NEXT NUMBER **/
 		}
 		
 		u8_a_notmatched = strcmp(u8_g_cardpin , u8_g_cardpinconfirm); /** CHECK IF PIN MATCHED OR NOT **/
 		
-		if (u8_a_notmatched == 0 && u8_character == 0) /** IF PIN MATCHED AND NO CHARACTERS **/
+		if (u8_a_notmatched == FALSE && u8_character == FALSE) /** IF PIN MATCHED AND NO CHARACTERS **/
 		{
 			UART_sendstr("\r\nData received successfully\r\n");
 			u8_a_cardstatus = CARD_OK ;
@@ -149,7 +139,7 @@ uint8_t APP_cardprogram()
 		
 		else /** TRY FAILED **/
 		{
-			if (u8_character == 1) /** USER ENTERED CHARACTER **/
+			if (u8_character == TRUE) /** USER ENTERED CHARACTER **/
 			{
 				UART_sendstr("\r\n Letters not allowed , numbers only\r\n");
 			}
@@ -159,9 +149,9 @@ uint8_t APP_cardprogram()
 			}
 		}
 		
-    	u8_a_try++ ; /** NEXT TRY **/
-		u8_a_num = 0 ; /** REINITIALIZE ITERATOR AND CHARACTER STATUS TO 0 AGAIN **/
-		u8_character = 0 ;
+    	u8_a_try++       ;   /** NEXT TRY **/
+		u8_a_num = FALSE     ;   /** REINITIALIZE ITERATOR AND CHARACTER STATUS TO 0 AGAIN **/
+		u8_character = FALSE ;
 		
 	}
 	
@@ -178,22 +168,26 @@ void APP_cardfailed()
 /** FUNCTION TO STORE CARD DATA IN THE EEPROM **/
 void APP_storecard()
 {
+	uint16_t pin_counter = 0x0000 ;
+	uint16_t pan_counter = 0x0000 ;
+	
+	
 	/** STORE THE TEST DATA IN THE EEPROM **/
 	EEPROM_writebyte(TEST_ADDRESS , TEST_DATA , PAGE_0 );
-	TMR0_delayms(40);
+	TMR0_delayms(MS_DELAY_40);
 	
 	/** STORE PIN NUMBER **/
-	for (uint16_t pin_counter = 0x0000 ; pin_counter < 0x0004 ; pin_counter++)
+	for (pin_counter = PIN_FIRST_DIGIT ; pin_counter < LAST_PIN_DIGIT ; pin_counter++)
 	{
 		EEPROM_writebyte(CARD_PINADDRESS_0+pin_counter , u8_g_cardpin[pin_counter] , PAGE_0 );
-		TMR0_delayms(20);
+		TMR0_delayms(MS_DELAY_20);
 	}
 
 	/** STORE PAN NUMBER **/
-	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
+	for (pan_counter = PAN_FIRST_DIGIT ; pan_counter < LAST_PAN_DIGIT ; pan_counter++)
 	{
 		EEPROM_writebyte(CARD_PANADDRESS_0+pan_counter , u8_g_cardpan[pan_counter] , PAGE_0 );
-		TMR0_delayms(20);
+		TMR0_delayms(MS_DELAY_20);
 	}
 
 }
@@ -201,22 +195,25 @@ void APP_storecard()
 /** FUNCTION TO READ CARD DATA FROM EEPROM **/
 void APP_getcarddata(void)
 {
+	uint16_t pin_counter = 0x0000 ;
+	uint16_t pan_counter = 0x0000 ;
+	
 	/** GET PIN FROM THE EEPROM **/
-	for (uint16_t counter = 0x0000 ; counter < 0x0004 ; counter++)
+	for (pin_counter = PIN_FIRST_DIGIT ; pin_counter < LAST_PIN_DIGIT ; pin_counter++)
 	{
-		EEPROM_readbyte(CARD_PINADDRESS_0+counter , &readpin[counter] , PAGE_0 );
-		TMR0_delayms(40);
+		EEPROM_readbyte(CARD_PINADDRESS_0+pin_counter , &readpin[pin_counter] , PAGE_0 );
+		TMR0_delayms(MS_DELAY_40);
 	}
 	
 	/** GET PAN FROM THE EEPROM **/ 
-	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
+	for (pan_counter = PAN_FIRST_DIGIT ; pan_counter < LAST_PAN_DIGIT ; pan_counter++)
 	{
 		EEPROM_readbyte(CARD_PANADDRESS_0+pan_counter , &readpan[pan_counter] , PAGE_0 );
-		TMR0_delayms(40);
+		TMR0_delayms(MS_DELAY_40);
 	}	
 }
 
-APP_sendtrigger()
+void APP_sendtrigger(void)
 {
 	/** ACTIVATE THE TRIGGER PIN **/
 	DIO_setpinvalue(DIO_PORTA , DIO_PIN0 , DIO_PIN_HIGH);
@@ -225,7 +222,7 @@ APP_sendtrigger()
 /** FUNCTION TO SEND CARD DATA TO ATM ECU **/
 void APP_sendcarddata() 
 {
-	TMR0_delayms(30);
+	TMR0_delayms(MS_DELAY_30);
 	
  	SPI_masterinittransmit(); /** START SPI TRANSMISSION **/
  	
@@ -233,7 +230,7 @@ void APP_sendcarddata()
 	
 	SPI_masterendtransmit(); /** END TRANSMISSION **/
 	
-	TMR0_delayms(30); /** DELAY FOR 30 MS **/
+	TMR0_delayms(MS_DELAY_30); /** DELAY FOR 30 MS **/
 	
 	SPI_masterinittransmit(); /** START SPI TRANSMISSION **/
 	

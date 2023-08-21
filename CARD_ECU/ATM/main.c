@@ -11,8 +11,6 @@ uint8_t u8_a_commtrig = 0 ;
 
 #include "APP/APP.h"
 
-#include "HAL/button/button_config.h"
-
 int main(void)
 {
 	uint8_t u8_a_card_valid = CARD_NOT_OK , u8_a_entrypoint ;
@@ -41,7 +39,7 @@ int main(void)
 		
 		do
 		{
-			Is_pressed(BUTTON1_PORT , BUTTON1_PIN , &u8_a_commtrig);
+			Is_pressed(BTN1_PORT , BTN1_PIN , &u8_a_commtrig);
 		} while (u8_a_commtrig == 0); /** UNTILL COMMUNICATION INITIATED **/
 			
 		APP_sendcarddata(); /** START THE **/
@@ -67,7 +65,7 @@ int main(void)
 		
 		do
 		{
-			Is_pressed(BUTTON1_PORT , BUTTON1_PIN , &u8_a_commtrig);
+			Is_pressed(BTN1_PORT , BTN1_PIN , &u8_a_commtrig);
 		} while (u8_a_commtrig == 0); /** UNTILL COMMUNICATION INITIATED **/
 			
 		APP_sendcarddata(); /** START THE **/
@@ -81,16 +79,11 @@ int main(void)
 		
 		do
 		{
-			Is_pressed(BUTTON1_PORT , BUTTON1_PIN , &u8_a_commtrig);
+			Is_pressed(BTN1_PORT , BTN1_PIN , &u8_a_commtrig);
 		} while (u8_a_commtrig == 0); /** UNTILL COMMUNICATION INITIATED **/
 			
 		APP_sendcarddata(); /** START THE COMMUNICATION & SEND CARD DATA **/
 	}
 	
-//     while (1) 
-//     {
-// 		
-//     }
-
 	}
 

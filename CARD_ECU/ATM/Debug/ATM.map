@@ -787,44 +787,44 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x20fb
+.debug_info     0x00000000     0x20d0
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x4e6 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega32a/avr5/crtatmega32a.o
- .debug_info    0x000004e6      0x844 APP/APP.o
- .debug_info    0x00000d2a      0x1d2 HAL/button/button_program.o
- .debug_info    0x00000efc      0x2c5 HAL/eeprom/EEPROM_program.o
- .debug_info    0x000011c1      0x333 main.o
- .debug_info    0x000014f4      0x2c7 MCAL/dio/DIO_program.o
- .debug_info    0x000017bb      0x177 MCAL/i2c/I2C_program.o
- .debug_info    0x00001932      0x376 MCAL/spi/SPI_program.o
- .debug_info    0x00001ca8      0x25b MCAL/timer0/TMR0_program.o
- .debug_info    0x00001f03      0x1f8 MCAL/uart/UART_program.o
+ .debug_info    0x000004e6      0x819 APP/APP.o
+ .debug_info    0x00000cff      0x1d2 HAL/button/button_program.o
+ .debug_info    0x00000ed1      0x2c5 HAL/eeprom/EEPROM_program.o
+ .debug_info    0x00001196      0x333 main.o
+ .debug_info    0x000014c9      0x2c7 MCAL/dio/DIO_program.o
+ .debug_info    0x00001790      0x177 MCAL/i2c/I2C_program.o
+ .debug_info    0x00001907      0x376 MCAL/spi/SPI_program.o
+ .debug_info    0x00001c7d      0x25b MCAL/timer0/TMR0_program.o
+ .debug_info    0x00001ed8      0x1f8 MCAL/uart/UART_program.o
 
-.debug_abbrev   0x00000000      0xd36
+.debug_abbrev   0x00000000      0xd13
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x4a3 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega32a/avr5/crtatmega32a.o
- .debug_abbrev  0x000004a3      0x168 APP/APP.o
- .debug_abbrev  0x0000060b       0xea HAL/button/button_program.o
- .debug_abbrev  0x000006f5       0xb2 HAL/eeprom/EEPROM_program.o
- .debug_abbrev  0x000007a7       0xe9 main.o
- .debug_abbrev  0x00000890       0xdf MCAL/dio/DIO_program.o
- .debug_abbrev  0x0000096f       0xb2 MCAL/i2c/I2C_program.o
- .debug_abbrev  0x00000a21      0x11f MCAL/spi/SPI_program.o
- .debug_abbrev  0x00000b40      0x101 MCAL/timer0/TMR0_program.o
- .debug_abbrev  0x00000c41       0xf5 MCAL/uart/UART_program.o
+ .debug_abbrev  0x000004a3      0x145 APP/APP.o
+ .debug_abbrev  0x000005e8       0xea HAL/button/button_program.o
+ .debug_abbrev  0x000006d2       0xb2 HAL/eeprom/EEPROM_program.o
+ .debug_abbrev  0x00000784       0xe9 main.o
+ .debug_abbrev  0x0000086d       0xdf MCAL/dio/DIO_program.o
+ .debug_abbrev  0x0000094c       0xb2 MCAL/i2c/I2C_program.o
+ .debug_abbrev  0x000009fe      0x11f MCAL/spi/SPI_program.o
+ .debug_abbrev  0x00000b1d      0x101 MCAL/timer0/TMR0_program.o
+ .debug_abbrev  0x00000c1e       0xf5 MCAL/uart/UART_program.o
 
-.debug_line     0x00000000     0x14f0
+.debug_line     0x00000000     0x14fa
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x116 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega32a/avr5/crtatmega32a.o
- .debug_line    0x00000116      0x47b APP/APP.o
- .debug_line    0x00000591      0x108 HAL/button/button_program.o
- .debug_line    0x00000699      0x1cf HAL/eeprom/EEPROM_program.o
- .debug_line    0x00000868      0x14c main.o
- .debug_line    0x000009b4      0x3b9 MCAL/dio/DIO_program.o
- .debug_line    0x00000d6d      0x1a6 MCAL/i2c/I2C_program.o
- .debug_line    0x00000f13      0x245 MCAL/spi/SPI_program.o
- .debug_line    0x00001158      0x1bb MCAL/timer0/TMR0_program.o
- .debug_line    0x00001313      0x1dd MCAL/uart/UART_program.o
+ .debug_line    0x00000116      0x485 APP/APP.o
+ .debug_line    0x0000059b      0x108 HAL/button/button_program.o
+ .debug_line    0x000006a3      0x1cf HAL/eeprom/EEPROM_program.o
+ .debug_line    0x00000872      0x14c main.o
+ .debug_line    0x000009be      0x3b9 MCAL/dio/DIO_program.o
+ .debug_line    0x00000d77      0x1a6 MCAL/i2c/I2C_program.o
+ .debug_line    0x00000f1d      0x245 MCAL/spi/SPI_program.o
+ .debug_line    0x00001162      0x1bb MCAL/timer0/TMR0_program.o
+ .debug_line    0x0000131d      0x1dd MCAL/uart/UART_program.o
 
 .debug_frame    0x00000000      0x468
  *(.debug_frame)
@@ -842,10 +842,10 @@ END GROUP
  *(.debug_str)
  .debug_str     0x00000000      0x196 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega32a/avr5/crtatmega32a.o
  .debug_str     0x00000196      0x390 APP/APP.o
-                                0x3b9 (size before relaxing)
- .debug_str     0x00000526       0xe4 HAL/button/button_program.o
-                                0x221 (size before relaxing)
- .debug_str     0x0000060a       0x8e HAL/eeprom/EEPROM_program.o
+                                0x3b1 (size before relaxing)
+ .debug_str     0x00000526       0xbc HAL/button/button_program.o
+                                0x233 (size before relaxing)
+ .debug_str     0x000005e2       0xb6 HAL/eeprom/EEPROM_program.o
                                 0x1fe (size before relaxing)
  .debug_str     0x00000698       0x3f main.o
                                 0x211 (size before relaxing)
@@ -860,17 +860,17 @@ END GROUP
  .debug_str     0x00000a84       0x9b MCAL/uart/UART_program.o
                                 0x231 (size before relaxing)
 
-.debug_loc      0x00000000      0xf22
+.debug_loc      0x00000000      0xf3a
  *(.debug_loc)
- .debug_loc     0x00000000      0x218 APP/APP.o
- .debug_loc     0x00000218      0x17f HAL/button/button_program.o
- .debug_loc     0x00000397      0x1cb HAL/eeprom/EEPROM_program.o
- .debug_loc     0x00000562       0x81 main.o
- .debug_loc     0x000005e3      0x504 MCAL/dio/DIO_program.o
- .debug_loc     0x00000ae7       0x71 MCAL/i2c/I2C_program.o
- .debug_loc     0x00000b58      0x169 MCAL/spi/SPI_program.o
- .debug_loc     0x00000cc1       0xf8 MCAL/timer0/TMR0_program.o
- .debug_loc     0x00000db9      0x169 MCAL/uart/UART_program.o
+ .debug_loc     0x00000000      0x230 APP/APP.o
+ .debug_loc     0x00000230      0x17f HAL/button/button_program.o
+ .debug_loc     0x000003af      0x1cb HAL/eeprom/EEPROM_program.o
+ .debug_loc     0x0000057a       0x81 main.o
+ .debug_loc     0x000005fb      0x504 MCAL/dio/DIO_program.o
+ .debug_loc     0x00000aff       0x71 MCAL/i2c/I2C_program.o
+ .debug_loc     0x00000b70      0x169 MCAL/spi/SPI_program.o
+ .debug_loc     0x00000cd9       0xf8 MCAL/timer0/TMR0_program.o
+ .debug_loc     0x00000dd1      0x169 MCAL/uart/UART_program.o
 
 .debug_macinfo
  *(.debug_macinfo)

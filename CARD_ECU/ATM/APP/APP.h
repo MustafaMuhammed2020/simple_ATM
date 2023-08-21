@@ -34,8 +34,28 @@
 /** FIRST ADDRESS OF PAN IN EEPROM **/
 #define CARD_PANADDRESS_0  0x00C0
 
+#define EMPTY_ADDRESS        0xFF
+#define MAX_PIN_ATTEMPT      2
+#define PIN_SIZE             4
+#define ZERO_ASCII           48
+#define NINE_ASCII           57
+#define TRUE                 1
+#define FALSE                0
+#define CARD_REPROGRAM       '2'
+#define CARD_USE             '1'
+#define LAST_PIN_DIGIT       0x0004
+#define LAST_PAN_DIGIT       0x0014
+#define PIN_FIRST_DIGIT      0x0000
+#define PAN_FIRST_DIGIT      0x0000
+#define MS_DELAY_20          20
+#define MS_DELAY_30          30
+#define MS_DELAY_40          40 
+#define PIN_NUM_SIZE         5
+#define PAN_NUM_SIZE         20
+#define BTN1_PIN             0
+#define BTN1_PORT            1
 
-	 
+
 /** FUNCTION FOR INITIALIZATION **/
 void APP_init(void);
 
@@ -58,6 +78,6 @@ void APP_storecard(void);
 void APP_getcarddata(void);
 
 /** FUNCTION TO SEND TRIGGER TO ATM ECU **/
-APP_sendtrigger();
+void APP_sendtrigger(void);
 
 #endif /* APP_H_ */

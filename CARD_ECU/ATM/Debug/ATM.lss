@@ -15,19 +15,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .debug_aranges 00000250  00000000  00000000  00000f74  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000020fb  00000000  00000000  000011c4  2**0
+  6 .debug_info   000020d0  00000000  00000000  000011c4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000d36  00000000  00000000  000032bf  2**0
+  7 .debug_abbrev 00000d13  00000000  00000000  00003294  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000014f0  00000000  00000000  00003ff5  2**0
+  8 .debug_line   000014fa  00000000  00000000  00003fa7  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000468  00000000  00000000  000054e8  2**2
+  9 .debug_frame  00000468  00000000  00000000  000054a4  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000b1f  00000000  00000000  00005950  2**0
+ 10 .debug_str    00000b1f  00000000  00000000  0000590c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000f22  00000000  00000000  0000646f  2**0
+ 11 .debug_loc    00000f3a  00000000  00000000  0000642b  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 000001c0  00000000  00000000  00007391  2**0
+ 12 .debug_ranges 000001c0  00000000  00000000  00007365  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -96,7 +96,7 @@ Disassembly of section .text:
   8e:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 00000092 <APP_init>:
-uint8_t readpan[20] = "0000000000000000000";
+uint8_t readpan[PAN_NUM_SIZE] = "0000000000000000000";
 
 /** FUNCTION FOR INITIALIZATION **/
 void APP_init()
@@ -154,7 +154,7 @@ uint8_t APP_entrypoint()
   d8:	90 e0       	ldi	r25, 0x00	; 0
   da:	0e 94 ea 01 	call	0x3d4	; 0x3d4 <EEPROM_readbyte>
 	
-	if (u8_l_eepromcheck == 0xFF) /** IF THE ADDRESS IS EMPTY **/
+	if (u8_l_eepromcheck == EMPTY_ADDRESS) /** IF THE ADDRESS IS EMPTY **/
   de:	89 81       	ldd	r24, Y+1	; 0x01
   e0:	8f 3f       	cpi	r24, 0xFF	; 255
   e2:	31 f4       	brne	.+12     	; 0xf0 <APP_entrypoint+0x30>
@@ -183,7 +183,7 @@ uint8_t APP_entrypoint()
   fe:	02 96       	adiw	r24, 0x02	; 2
  100:	0e 94 04 05 	call	0xa08	; 0xa08 <UART_receivechar>
 		
-		if (u8_receiveddata == '2')
+		if (u8_receiveddata == CARD_REPROGRAM) /** USER SELECTED PROGRAMMING MODE **/
  104:	8a 81       	ldd	r24, Y+2	; 0x02
  106:	82 33       	cpi	r24, 0x32	; 50
  108:	61 f0       	breq	.+24     	; 0x122 <APP_entrypoint+0x62>
@@ -191,7 +191,7 @@ uint8_t APP_entrypoint()
 			u8_l_returnmode = REPROGRAM_MODE ; /** RETURN THE REPROGRAMMING MODE **/ 
 		}
 		
-		else if (u8_receiveddata == '1')
+		else if (u8_receiveddata == CARD_USE) /** USER SELECTED TO ENTER USER MODE **/
  10a:	81 33       	cpi	r24, 0x31	; 49
  10c:	61 f0       	breq	.+24     	; 0x126 <APP_entrypoint+0x66>
 			u8_l_returnmode = USER_MODE ; /** RETURN THE USER MODE **/
@@ -218,14 +218,14 @@ uint8_t APP_entrypoint()
 		
 		UART_receivechar(&u8_receiveddata);
 		
-		if (u8_receiveddata == '2')
+		if (u8_receiveddata == CARD_REPROGRAM) /** USER SELECTED PROGRAMMING MODE **/
 		{
 			u8_l_returnmode = REPROGRAM_MODE ; /** RETURN THE REPROGRAMMING MODE **/ 
  122:	82 e0       	ldi	r24, 0x02	; 2
  124:	01 c0       	rjmp	.+2      	; 0x128 <APP_entrypoint+0x68>
 		}
 		
-		else if (u8_receiveddata == '1')
+		else if (u8_receiveddata == CARD_USE) /** USER SELECTED TO ENTER USER MODE **/
 		{
 			u8_l_returnmode = USER_MODE ; /** RETURN THE USER MODE **/
  126:	81 e0       	ldi	r24, 0x01	; 1
@@ -279,7 +279,7 @@ uint8_t APP_cardprogram()
 	UART_sendstr("Please enter card PAN\r\n"); /** ASK USER TO INTER CARD PAN **/
 	UART_receivestr(&u8_g_cardpan); /** RECEIVE PAN FROM USER **/
 	
-	while (u8_a_try <= 2) /** JUST TWO ATTEMPTS TO SET CARD PIN **/
+	while (u8_a_try <= MAX_PIN_ATTEMPT) /** JUST TWO ATTEMPTS TO SET CARD PIN **/
  150:	3d c0       	rjmp	.+122    	; 0x1cc <APP_cardprogram+0x9a>
 	{
 		UART_sendstr("\r\nPlease enter new 4-numbers PIN\r\n");/** ASK USER TO INTER CARD PIN **/
@@ -301,13 +301,13 @@ uint8_t APP_cardprogram()
  16e:	0e 94 0a 05 	call	0xa14	; 0xa14 <UART_receivestr>
 		
 		/** CHECK IF CHARACTER ENTERED **/
-		while(u8_a_num < 4)
+		while(u8_a_num < PIN_SIZE)
  172:	c0 e0       	ldi	r28, 0x00	; 0
  174:	80 e0       	ldi	r24, 0x00	; 0
  176:	0a c0       	rjmp	.+20     	; 0x18c <APP_cardprogram+0x5a>
 		{
-			/** VALIDATE THE USER INPUT AS NUMBERS ONLY **/
-			if (!((u8_g_cardpin[u8_a_num] >= 48) && (u8_g_cardpin[u8_a_num] <= 57)))
+			/** VALIDATE THE USER INPUT AS NUMBERS ONLY FROM 0 to 9 **/
+			if (!((u8_g_cardpin[u8_a_num] >= ZERO_ASCII) && (u8_g_cardpin[u8_a_num] <= NINE_ASCII)))
  178:	e8 2f       	mov	r30, r24
  17a:	f0 e0       	ldi	r31, 0x00	; 0
  17c:	ee 56       	subi	r30, 0x6E	; 110
@@ -317,7 +317,7 @@ uint8_t APP_cardprogram()
  184:	9a 30       	cpi	r25, 0x0A	; 10
  186:	08 f0       	brcs	.+2      	; 0x18a <APP_cardprogram+0x58>
 			{
-				u8_character = 1 ; /** CHARACTER FOUND **/
+				u8_character = TRUE ; /** CHARACTER FOUND **/
  188:	c1 e0       	ldi	r28, 0x01	; 1
 			}
 			u8_a_num++ ; /** JUMP TO THE NEXT NUMBER **/
@@ -327,10 +327,10 @@ uint8_t APP_cardprogram()
 		UART_receivestr(&u8_g_cardpinconfirm); /** RECEIVE PIN CONFIRMATION **/
 		
 		/** CHECK IF CHARACTER ENTERED **/
-		while(u8_a_num < 4)
+		while(u8_a_num < PIN_SIZE)
  18c:	84 30       	cpi	r24, 0x04	; 4
  18e:	a0 f3       	brcs	.-24     	; 0x178 <APP_cardprogram+0x46>
-				u8_character = 1 ; /** CHARACTER FOUND **/
+				u8_character = TRUE ; /** CHARACTER FOUND **/
 			}
 			u8_a_num++ ; /** JUMP TO THE NEXT NUMBER **/
 		}
@@ -343,7 +343,7 @@ uint8_t APP_cardprogram()
  198:	0e 94 4d 06 	call	0xc9a	; 0xc9a <strcmp>
  19c:	80 93 24 02 	sts	0x0224, r24	; 0x800224 <__data_end>
 		
-		if (u8_a_notmatched == 0 && u8_character == 0) /** IF PIN MATCHED AND NO CHARACTERS **/
+		if (u8_a_notmatched == FALSE && u8_character == FALSE) /** IF PIN MATCHED AND NO CHARACTERS **/
  1a0:	81 11       	cpse	r24, r1
  1a2:	08 c0       	rjmp	.+16     	; 0x1b4 <APP_cardprogram+0x82>
  1a4:	c1 11       	cpse	r28, r1
@@ -361,7 +361,7 @@ uint8_t APP_cardprogram()
 		
 		else /** TRY FAILED **/
 		{
-			if (u8_character == 1) /** USER ENTERED CHARACTER **/
+			if (u8_character == TRUE) /** USER ENTERED CHARACTER **/
  1b4:	c1 30       	cpi	r28, 0x01	; 1
  1b6:	29 f4       	brne	.+10     	; 0x1c2 <APP_cardprogram+0x90>
 			{
@@ -380,14 +380,14 @@ uint8_t APP_cardprogram()
 			}
 		}
 		
-    	u8_a_try++ ; /** NEXT TRY **/
+    	u8_a_try++       ;   /** NEXT TRY **/
  1ca:	df 5f       	subi	r29, 0xFF	; 255
 	UART_sendstr("\r\n          you are in the programming mode\r\n"); /** MESSAGE **/
 	
 	UART_sendstr("Please enter card PAN\r\n"); /** ASK USER TO INTER CARD PAN **/
 	UART_receivestr(&u8_g_cardpan); /** RECEIVE PAN FROM USER **/
 	
-	while (u8_a_try <= 2) /** JUST TWO ATTEMPTS TO SET CARD PIN **/
+	while (u8_a_try <= MAX_PIN_ATTEMPT) /** JUST TWO ATTEMPTS TO SET CARD PIN **/
  1cc:	d3 30       	cpi	r29, 0x03	; 3
  1ce:	08 f2       	brcs	.-126    	; 0x152 <APP_cardprogram+0x20>
 
@@ -397,7 +397,7 @@ uint8_t APP_cardprogram()
 {
 	uint8_t u8_a_cardstatus = CARD_NOT_OK ;
  1d0:	80 e0       	ldi	r24, 0x00	; 0
-		u8_character = 0 ;
+		u8_character = FALSE ;
 		
 	}
 	
@@ -427,6 +427,10 @@ void APP_storecard()
 {
  1e2:	cf 93       	push	r28
  1e4:	df 93       	push	r29
+	uint16_t pin_counter = 0x0000 ;
+	uint16_t pan_counter = 0x0000 ;
+	
+	
 	/** STORE THE TEST DATA IN THE EEPROM **/
 	EEPROM_writebyte(TEST_ADDRESS , TEST_DATA , PAGE_0 );
  1e6:	40 e0       	ldi	r20, 0x00	; 0
@@ -434,7 +438,7 @@ void APP_storecard()
  1ea:	80 e0       	ldi	r24, 0x00	; 0
  1ec:	90 e0       	ldi	r25, 0x00	; 0
  1ee:	0e 94 aa 01 	call	0x354	; 0x354 <EEPROM_writebyte>
-	TMR0_delayms(40);
+	TMR0_delayms(MS_DELAY_40);
  1f2:	68 e2       	ldi	r22, 0x28	; 40
  1f4:	70 e0       	ldi	r23, 0x00	; 0
  1f6:	80 e0       	ldi	r24, 0x00	; 0
@@ -442,7 +446,7 @@ void APP_storecard()
  1fa:	0e 94 77 04 	call	0x8ee	; 0x8ee <TMR0_delayms>
 	
 	/** STORE PIN NUMBER **/
-	for (uint16_t pin_counter = 0x0000 ; pin_counter < 0x0004 ; pin_counter++)
+	for (pin_counter = PIN_FIRST_DIGIT ; pin_counter < LAST_PIN_DIGIT ; pin_counter++)
  1fe:	c0 e0       	ldi	r28, 0x00	; 0
  200:	d0 e0       	ldi	r29, 0x00	; 0
  202:	11 c0       	rjmp	.+34     	; 0x226 <APP_storecard+0x44>
@@ -457,7 +461,7 @@ void APP_storecard()
  210:	80 51       	subi	r24, 0x10	; 16
  212:	9f 4f       	sbci	r25, 0xFF	; 255
  214:	0e 94 aa 01 	call	0x354	; 0x354 <EEPROM_writebyte>
-		TMR0_delayms(20);
+		TMR0_delayms(MS_DELAY_20);
  218:	64 e1       	ldi	r22, 0x14	; 20
  21a:	70 e0       	ldi	r23, 0x00	; 0
  21c:	80 e0       	ldi	r24, 0x00	; 0
@@ -465,10 +469,10 @@ void APP_storecard()
  220:	0e 94 77 04 	call	0x8ee	; 0x8ee <TMR0_delayms>
 	/** STORE THE TEST DATA IN THE EEPROM **/
 	EEPROM_writebyte(TEST_ADDRESS , TEST_DATA , PAGE_0 );
-	TMR0_delayms(40);
+	TMR0_delayms(MS_DELAY_40);
 	
 	/** STORE PIN NUMBER **/
-	for (uint16_t pin_counter = 0x0000 ; pin_counter < 0x0004 ; pin_counter++)
+	for (pin_counter = PIN_FIRST_DIGIT ; pin_counter < LAST_PIN_DIGIT ; pin_counter++)
  224:	21 96       	adiw	r28, 0x01	; 1
  226:	c4 30       	cpi	r28, 0x04	; 4
  228:	d1 05       	cpc	r29, r1
@@ -479,7 +483,7 @@ void APP_storecard()
 	}
 
 	/** STORE PAN NUMBER **/
-	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
+	for (pan_counter = PAN_FIRST_DIGIT ; pan_counter < LAST_PAN_DIGIT ; pan_counter++)
 	{
 		EEPROM_writebyte(CARD_PANADDRESS_0+pan_counter , u8_g_cardpan[pan_counter] , PAGE_0 );
  232:	fe 01       	movw	r30, r28
@@ -491,25 +495,25 @@ void APP_storecard()
  23e:	80 54       	subi	r24, 0x40	; 64
  240:	9f 4f       	sbci	r25, 0xFF	; 255
  242:	0e 94 aa 01 	call	0x354	; 0x354 <EEPROM_writebyte>
-		TMR0_delayms(20);
+		TMR0_delayms(MS_DELAY_20);
  246:	64 e1       	ldi	r22, 0x14	; 20
  248:	70 e0       	ldi	r23, 0x00	; 0
  24a:	80 e0       	ldi	r24, 0x00	; 0
  24c:	90 e0       	ldi	r25, 0x00	; 0
  24e:	0e 94 77 04 	call	0x8ee	; 0x8ee <TMR0_delayms>
 		EEPROM_writebyte(CARD_PINADDRESS_0+pin_counter , u8_g_cardpin[pin_counter] , PAGE_0 );
-		TMR0_delayms(20);
+		TMR0_delayms(MS_DELAY_20);
 	}
 
 	/** STORE PAN NUMBER **/
-	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
+	for (pan_counter = PAN_FIRST_DIGIT ; pan_counter < LAST_PAN_DIGIT ; pan_counter++)
  252:	21 96       	adiw	r28, 0x01	; 1
  254:	c4 31       	cpi	r28, 0x14	; 20
  256:	d1 05       	cpc	r29, r1
  258:	60 f3       	brcs	.-40     	; 0x232 <APP_storecard+0x50>
 	{
 		EEPROM_writebyte(CARD_PANADDRESS_0+pan_counter , u8_g_cardpan[pan_counter] , PAGE_0 );
-		TMR0_delayms(20);
+		TMR0_delayms(MS_DELAY_20);
 	}
 
 }
@@ -524,13 +528,16 @@ void APP_getcarddata(void)
 {
  260:	cf 93       	push	r28
  262:	df 93       	push	r29
+	uint16_t pin_counter = 0x0000 ;
+	uint16_t pan_counter = 0x0000 ;
+	
 	/** GET PIN FROM THE EEPROM **/
-	for (uint16_t counter = 0x0000 ; counter < 0x0004 ; counter++)
+	for (pin_counter = PIN_FIRST_DIGIT ; pin_counter < LAST_PIN_DIGIT ; pin_counter++)
  264:	c0 e0       	ldi	r28, 0x00	; 0
  266:	d0 e0       	ldi	r29, 0x00	; 0
  268:	10 c0       	rjmp	.+32     	; 0x28a <APP_getcarddata+0x2a>
 	{
-		EEPROM_readbyte(CARD_PINADDRESS_0+counter , &readpin[counter] , PAGE_0 );
+		EEPROM_readbyte(CARD_PINADDRESS_0+pin_counter , &readpin[pin_counter] , PAGE_0 );
  26a:	be 01       	movw	r22, r28
  26c:	6c 58       	subi	r22, 0x8C	; 140
  26e:	7f 4f       	sbci	r23, 0xFF	; 255
@@ -539,18 +546,18 @@ void APP_getcarddata(void)
  274:	80 51       	subi	r24, 0x10	; 16
  276:	9f 4f       	sbci	r25, 0xFF	; 255
  278:	0e 94 ea 01 	call	0x3d4	; 0x3d4 <EEPROM_readbyte>
-		TMR0_delayms(40);
+		TMR0_delayms(MS_DELAY_40);
  27c:	68 e2       	ldi	r22, 0x28	; 40
  27e:	70 e0       	ldi	r23, 0x00	; 0
  280:	80 e0       	ldi	r24, 0x00	; 0
  282:	90 e0       	ldi	r25, 0x00	; 0
  284:	0e 94 77 04 	call	0x8ee	; 0x8ee <TMR0_delayms>
-
-/** FUNCTION TO READ CARD DATA FROM EEPROM **/
-void APP_getcarddata(void)
 {
+	uint16_t pin_counter = 0x0000 ;
+	uint16_t pan_counter = 0x0000 ;
+	
 	/** GET PIN FROM THE EEPROM **/
-	for (uint16_t counter = 0x0000 ; counter < 0x0004 ; counter++)
+	for (pin_counter = PIN_FIRST_DIGIT ; pin_counter < LAST_PIN_DIGIT ; pin_counter++)
  288:	21 96       	adiw	r28, 0x01	; 1
  28a:	c4 30       	cpi	r28, 0x04	; 4
  28c:	d1 05       	cpc	r29, r1
@@ -561,7 +568,7 @@ void APP_getcarddata(void)
 	}
 	
 	/** GET PAN FROM THE EEPROM **/ 
-	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
+	for (pan_counter = PAN_FIRST_DIGIT ; pan_counter < LAST_PAN_DIGIT ; pan_counter++)
 	{
 		EEPROM_readbyte(CARD_PANADDRESS_0+pan_counter , &readpan[pan_counter] , PAGE_0 );
  296:	be 01       	movw	r22, r28
@@ -572,25 +579,25 @@ void APP_getcarddata(void)
  2a0:	80 54       	subi	r24, 0x40	; 64
  2a2:	9f 4f       	sbci	r25, 0xFF	; 255
  2a4:	0e 94 ea 01 	call	0x3d4	; 0x3d4 <EEPROM_readbyte>
-		TMR0_delayms(40);
+		TMR0_delayms(MS_DELAY_40);
  2a8:	68 e2       	ldi	r22, 0x28	; 40
  2aa:	70 e0       	ldi	r23, 0x00	; 0
  2ac:	80 e0       	ldi	r24, 0x00	; 0
  2ae:	90 e0       	ldi	r25, 0x00	; 0
  2b0:	0e 94 77 04 	call	0x8ee	; 0x8ee <TMR0_delayms>
-		EEPROM_readbyte(CARD_PINADDRESS_0+counter , &readpin[counter] , PAGE_0 );
-		TMR0_delayms(40);
+		EEPROM_readbyte(CARD_PINADDRESS_0+pin_counter , &readpin[pin_counter] , PAGE_0 );
+		TMR0_delayms(MS_DELAY_40);
 	}
 	
 	/** GET PAN FROM THE EEPROM **/ 
-	for (uint16_t pan_counter = 0x0000 ; pan_counter < 0x0014 ; pan_counter++)
+	for (pan_counter = PAN_FIRST_DIGIT ; pan_counter < LAST_PAN_DIGIT ; pan_counter++)
  2b4:	21 96       	adiw	r28, 0x01	; 1
  2b6:	c4 31       	cpi	r28, 0x14	; 20
  2b8:	d1 05       	cpc	r29, r1
  2ba:	68 f3       	brcs	.-38     	; 0x296 <APP_getcarddata+0x36>
 	{
 		EEPROM_readbyte(CARD_PANADDRESS_0+pan_counter , &readpan[pan_counter] , PAGE_0 );
-		TMR0_delayms(40);
+		TMR0_delayms(MS_DELAY_40);
 	}	
 }
  2bc:	df 91       	pop	r29
@@ -599,7 +606,7 @@ void APP_getcarddata(void)
 
 000002c2 <APP_sendtrigger>:
 
-APP_sendtrigger()
+void APP_sendtrigger(void)
 {
 	/** ACTIVATE THE TRIGGER PIN **/
 	DIO_setpinvalue(DIO_PORTA , DIO_PIN0 , DIO_PIN_HIGH);
@@ -607,15 +614,15 @@ APP_sendtrigger()
  2c4:	60 e0       	ldi	r22, 0x00	; 0
  2c6:	80 e0       	ldi	r24, 0x00	; 0
  2c8:	0e 94 1d 03 	call	0x63a	; 0x63a <DIO_setpinvalue>
-}
  2cc:	08 95       	ret
 
 000002ce <APP_sendcarddata>:
+}
 
 /** FUNCTION TO SEND CARD DATA TO ATM ECU **/
 void APP_sendcarddata() 
 {
-	TMR0_delayms(30);
+	TMR0_delayms(MS_DELAY_30);
  2ce:	6e e1       	ldi	r22, 0x1E	; 30
  2d0:	70 e0       	ldi	r23, 0x00	; 0
  2d2:	80 e0       	ldi	r24, 0x00	; 0
@@ -633,7 +640,7 @@ void APP_sendcarddata()
 	SPI_masterendtransmit(); /** END TRANSMISSION **/
  2e6:	0e 94 33 04 	call	0x866	; 0x866 <SPI_masterendtransmit>
 	
-	TMR0_delayms(30); /** DELAY FOR 30 MS **/
+	TMR0_delayms(MS_DELAY_30); /** DELAY FOR 30 MS **/
  2ea:	6e e1       	ldi	r22, 0x1E	; 30
  2ec:	70 e0       	ldi	r23, 0x00	; 0
  2ee:	80 e0       	ldi	r24, 0x00	; 0
@@ -737,22 +744,10 @@ button_t Is_pressed(uint8_t Button_port , uint8_t Button_pin , uint8_t * value)
  34c:	08 95       	ret
 
 0000034e <EEPROM_init>:
-/** AGGUMENTS : VOID                                        **/
-/** RETURNS   : VOID                                        **/
-/*************************************************************/
-void EEPROM_init(void)
-{
-	TWI_init(); /** INITIALIZE TWI MODULE **/
  34e:	0e 94 da 03 	call	0x7b4	; 0x7b4 <TWI_init>
  352:	08 95       	ret
 
 00000354 <EEPROM_writebyte>:
-/** FUNCTION TO WRITE BYTE TO SPECIFIC EEPROM ADDRESS       **/
-/** AGGUMENTS : u16_a_address (ADDRSS) , u8_a_data (DATA)   **/
-/** RETURNS   : uint8_t (SUCCESS STATE/ FAIL STATE)         **/
-/*************************************************************/
-uint8_t EEPROM_writebyte(uint16_t u16_a_address , uint8_t u8_a_data , uint8_t u8_a_page_address)
-{
  354:	0f 93       	push	r16
  356:	1f 93       	push	r17
  358:	cf 93       	push	r28
@@ -761,113 +756,46 @@ uint8_t EEPROM_writebyte(uint16_t u16_a_address , uint8_t u8_a_data , uint8_t u8
  35e:	d9 2f       	mov	r29, r25
  360:	06 2f       	mov	r16, r22
  362:	c4 2f       	mov	r28, r20
-	TWI_start(); /** SEND START CONDITION **/
  364:	0e 94 e0 03 	call	0x7c0	; 0x7c0 <TWI_start>
-	
-	if (TWI_getstatus() != TW_START) /** CHECK THE STATUS CODE **/
  368:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  36c:	88 30       	cpi	r24, 0x08	; 8
  36e:	21 f5       	brne	.+72     	; 0x3b8 <EEPROM_writebyte+0x64>
-	return ERROR;
-	
-	/** SEND DEVICE ADDRESS WITH WRITE OPERATION **/
-	TWI_write(0xA0 | (u8_a_page_address << 1));
  370:	8c 2f       	mov	r24, r28
  372:	90 e0       	ldi	r25, 0x00	; 0
  374:	88 0f       	add	r24, r24
  376:	99 1f       	adc	r25, r25
  378:	80 6a       	ori	r24, 0xA0	; 160
  37a:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_SLA_W_ACK) /** CHECK THE STATUS CODE **/
  37e:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  382:	88 31       	cpi	r24, 0x18	; 24
  384:	d9 f4       	brne	.+54     	; 0x3bc <EEPROM_writebyte+0x68>
-	return ERROR;
-	
-	/** SEND THE FIRST ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address >> 8));
  386:	8d 2f       	mov	r24, r29
  388:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
  38c:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  390:	88 32       	cpi	r24, 0x28	; 40
  392:	b1 f4       	brne	.+44     	; 0x3c0 <EEPROM_writebyte+0x6c>
-	return ERROR;
-	
-	/** SEND THE SECOND ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address));
  394:	81 2f       	mov	r24, r17
  396:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
  39a:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  39e:	88 32       	cpi	r24, 0x28	; 40
  3a0:	89 f4       	brne	.+34     	; 0x3c4 <EEPROM_writebyte+0x70>
-	return ERROR;
-	
-	/** WRITE THE DATA BYTE **/
-	TWI_write(u8_a_data);
  3a2:	80 2f       	mov	r24, r16
  3a4:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
  3a8:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  3ac:	88 32       	cpi	r24, 0x28	; 40
  3ae:	61 f4       	brne	.+24     	; 0x3c8 <EEPROM_writebyte+0x74>
-	return ERROR;
-	
-	TWI_stop();
  3b0:	0e 94 f4 03 	call	0x7e8	; 0x7e8 <TWI_stop>
-	
-	return SUCCESS;
  3b4:	81 e0       	ldi	r24, 0x01	; 1
  3b6:	09 c0       	rjmp	.+18     	; 0x3ca <EEPROM_writebyte+0x76>
-uint8_t EEPROM_writebyte(uint16_t u16_a_address , uint8_t u8_a_data , uint8_t u8_a_page_address)
-{
-	TWI_start(); /** SEND START CONDITION **/
-	
-	if (TWI_getstatus() != TW_START) /** CHECK THE STATUS CODE **/
-	return ERROR;
  3b8:	80 e0       	ldi	r24, 0x00	; 0
  3ba:	07 c0       	rjmp	.+14     	; 0x3ca <EEPROM_writebyte+0x76>
-	
-	/** SEND DEVICE ADDRESS WITH WRITE OPERATION **/
-	TWI_write(0xA0 | (u8_a_page_address << 1));
-	
-	if (TWI_getstatus() != TW_MT_SLA_W_ACK) /** CHECK THE STATUS CODE **/
-	return ERROR;
  3bc:	80 e0       	ldi	r24, 0x00	; 0
  3be:	05 c0       	rjmp	.+10     	; 0x3ca <EEPROM_writebyte+0x76>
-	
-	/** SEND THE FIRST ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address >> 8));
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  3c0:	80 e0       	ldi	r24, 0x00	; 0
  3c2:	03 c0       	rjmp	.+6      	; 0x3ca <EEPROM_writebyte+0x76>
-	
-	/** SEND THE SECOND ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address));
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  3c4:	80 e0       	ldi	r24, 0x00	; 0
  3c6:	01 c0       	rjmp	.+2      	; 0x3ca <EEPROM_writebyte+0x76>
-	
-	/** WRITE THE DATA BYTE **/
-	TWI_write(u8_a_data);
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  3c8:	80 e0       	ldi	r24, 0x00	; 0
-	
-	TWI_stop();
-	
-	return SUCCESS;
-}
  3ca:	df 91       	pop	r29
  3cc:	cf 91       	pop	r28
  3ce:	1f 91       	pop	r17
@@ -875,12 +803,6 @@ uint8_t EEPROM_writebyte(uint16_t u16_a_address , uint8_t u8_a_data , uint8_t u8
  3d2:	08 95       	ret
 
 000003d4 <EEPROM_readbyte>:
-/** FUNCTION TO READ BYTE FROM SPECIFIC EEPROM ADDRESS      **/
-/** AGGUMENTS : u16_a_address (ADDRSS) , u8_a_data (DATA)   **/
-/** RETURNS   : uint8_t (SUCCESS STATE/ FAIL STATE)         **/
-/*************************************************************/
-uint8_t EEPROM_readbyte(uint16_t u16_a_address , uint8_t *u8_a_data , uint8_t u8_a_page_address)
-{
  3d4:	ef 92       	push	r14
  3d6:	ff 92       	push	r15
  3d8:	0f 93       	push	r16
@@ -891,150 +813,61 @@ uint8_t EEPROM_readbyte(uint16_t u16_a_address , uint8_t *u8_a_data , uint8_t u8
  3e2:	19 2f       	mov	r17, r25
  3e4:	7b 01       	movw	r14, r22
  3e6:	c4 2f       	mov	r28, r20
-	TWI_start(); /** SEND START CONDITION **/
  3e8:	0e 94 e0 03 	call	0x7c0	; 0x7c0 <TWI_start>
-	
-	if (TWI_getstatus() != TW_START)  /** CHECK THE STATUS CODE **/
  3ec:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  3f0:	88 30       	cpi	r24, 0x08	; 8
  3f2:	99 f5       	brne	.+102    	; 0x45a <__EEPROM_REGION_LENGTH__+0x5a>
-	return ERROR;
-	
-	/** SEND DEVICE ADDRESS WITH WRITE OPERATION **/
-	TWI_write(0xA0 | (u8_a_page_address << 1));
  3f4:	d0 e0       	ldi	r29, 0x00	; 0
  3f6:	cc 0f       	add	r28, r28
  3f8:	dd 1f       	adc	r29, r29
  3fa:	8c 2f       	mov	r24, r28
  3fc:	80 6a       	ori	r24, 0xA0	; 160
  3fe:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_SLA_W_ACK)  /** CHECK THE STATUS CODE **/
  402:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  406:	88 31       	cpi	r24, 0x18	; 24
  408:	51 f5       	brne	.+84     	; 0x45e <__EEPROM_REGION_LENGTH__+0x5e>
-	return ERROR;
-	
-	/** SEND THE FIRST ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address >> 8));
  40a:	81 2f       	mov	r24, r17
  40c:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
  410:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  414:	88 32       	cpi	r24, 0x28	; 40
  416:	29 f5       	brne	.+74     	; 0x462 <__EEPROM_REGION_LENGTH__+0x62>
-	return ERROR;
-	
-	/** SEND THE SECOND ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address));
  418:	80 2f       	mov	r24, r16
  41a:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
  41e:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  422:	88 32       	cpi	r24, 0x28	; 40
  424:	01 f5       	brne	.+64     	; 0x466 <__EEPROM_REGION_LENGTH__+0x66>
-	return ERROR;
-	
-	/** SEND REPEATED START **/
-	TWI_start();
  426:	0e 94 e0 03 	call	0x7c0	; 0x7c0 <TWI_start>
-	
-	if (TWI_getstatus() != TW_REP_START)  /** CHECK THE STATUS CODE **/
  42a:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  42e:	80 31       	cpi	r24, 0x10	; 16
  430:	e1 f4       	brne	.+56     	; 0x46a <__EEPROM_REGION_LENGTH__+0x6a>
-	return ERROR;
-	
-	/** SEND DEVICE ADDRESS WITH READ OPERATION **/
-	TWI_write(0xA0 | ((u8_a_page_address << 1) | 0x01));
  432:	8c 2f       	mov	r24, r28
  434:	81 6a       	ori	r24, 0xA1	; 161
  436:	0e 94 ed 03 	call	0x7da	; 0x7da <TWI_write>
-	
-	if (TWI_getstatus() != TW_MT_SLA_R_ACK)  /** CHECK THE STATUS CODE **/
  43a:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  43e:	80 34       	cpi	r24, 0x40	; 64
  440:	b1 f4       	brne	.+44     	; 0x46e <__EEPROM_REGION_LENGTH__+0x6e>
-	return ERROR;
-	
-	*u8_a_data = TWI_readwithnack(); /** READ THE DATA WITH ACK BIT **/
  442:	0e 94 e6 03 	call	0x7cc	; 0x7cc <TWI_readwithnack>
  446:	f7 01       	movw	r30, r14
  448:	80 83       	st	Z, r24
-	
-	if (TWI_getstatus() != TW_MR_DATA_NACK)  /** CHECK THE STATUS CODE **/
  44a:	0e 94 f7 03 	call	0x7ee	; 0x7ee <TWI_getstatus>
  44e:	88 35       	cpi	r24, 0x58	; 88
  450:	81 f4       	brne	.+32     	; 0x472 <__EEPROM_REGION_LENGTH__+0x72>
-	return ERROR;
-	
-	TWI_stop(); /** SEND STOP CONDITION **/
  452:	0e 94 f4 03 	call	0x7e8	; 0x7e8 <TWI_stop>
-	
-	return SUCCESS; /** RETURN SUCCESS IF THE FRAME SENT CORRECTLY **/
  456:	81 e0       	ldi	r24, 0x01	; 1
  458:	0d c0       	rjmp	.+26     	; 0x474 <__EEPROM_REGION_LENGTH__+0x74>
-uint8_t EEPROM_readbyte(uint16_t u16_a_address , uint8_t *u8_a_data , uint8_t u8_a_page_address)
-{
-	TWI_start(); /** SEND START CONDITION **/
-	
-	if (TWI_getstatus() != TW_START)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  45a:	80 e0       	ldi	r24, 0x00	; 0
  45c:	0b c0       	rjmp	.+22     	; 0x474 <__EEPROM_REGION_LENGTH__+0x74>
-	
-	/** SEND DEVICE ADDRESS WITH WRITE OPERATION **/
-	TWI_write(0xA0 | (u8_a_page_address << 1));
-	
-	if (TWI_getstatus() != TW_MT_SLA_W_ACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  45e:	80 e0       	ldi	r24, 0x00	; 0
  460:	09 c0       	rjmp	.+18     	; 0x474 <__EEPROM_REGION_LENGTH__+0x74>
-	
-	/** SEND THE FIRST ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address >> 8));
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  462:	80 e0       	ldi	r24, 0x00	; 0
  464:	07 c0       	rjmp	.+14     	; 0x474 <__EEPROM_REGION_LENGTH__+0x74>
-	
-	/** SEND THE SECOND ADDRESS BYTE LOCATION ADDRESS **/
-	TWI_write((uint8_t)(u16_a_address));
-	
-	if (TWI_getstatus() != TW_MT_DATA_ACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  466:	80 e0       	ldi	r24, 0x00	; 0
  468:	05 c0       	rjmp	.+10     	; 0x474 <__EEPROM_REGION_LENGTH__+0x74>
-	
-	/** SEND REPEATED START **/
-	TWI_start();
-	
-	if (TWI_getstatus() != TW_REP_START)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  46a:	80 e0       	ldi	r24, 0x00	; 0
  46c:	03 c0       	rjmp	.+6      	; 0x474 <__EEPROM_REGION_LENGTH__+0x74>
-	
-	/** SEND DEVICE ADDRESS WITH READ OPERATION **/
-	TWI_write(0xA0 | ((u8_a_page_address << 1) | 0x01));
-	
-	if (TWI_getstatus() != TW_MT_SLA_R_ACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  46e:	80 e0       	ldi	r24, 0x00	; 0
  470:	01 c0       	rjmp	.+2      	; 0x474 <__EEPROM_REGION_LENGTH__+0x74>
-	
-	*u8_a_data = TWI_readwithnack(); /** READ THE DATA WITH ACK BIT **/
-	
-	if (TWI_getstatus() != TW_MR_DATA_NACK)  /** CHECK THE STATUS CODE **/
-	return ERROR;
  472:	80 e0       	ldi	r24, 0x00	; 0
-	
-	TWI_stop(); /** SEND STOP CONDITION **/
-	
-	return SUCCESS; /** RETURN SUCCESS IF THE FRAME SENT CORRECTLY **/
-}
  474:	df 91       	pop	r29
  476:	cf 91       	pop	r28
  478:	1f 91       	pop	r17
@@ -1087,7 +920,7 @@ int main(void)
 		
 		do
 		{
-			Is_pressed(BUTTON1_PORT , BUTTON1_PIN , &u8_a_commtrig);
+			Is_pressed(BTN1_PORT , BTN1_PIN , &u8_a_commtrig);
  4ae:	45 e2       	ldi	r20, 0x25	; 37
  4b0:	52 e0       	ldi	r21, 0x02	; 2
  4b2:	60 e0       	ldi	r22, 0x00	; 0
@@ -1137,7 +970,7 @@ int main(void)
 		
 		do
 		{
-			Is_pressed(BUTTON1_PORT , BUTTON1_PIN , &u8_a_commtrig);
+			Is_pressed(BTN1_PORT , BTN1_PIN , &u8_a_commtrig);
  4f0:	45 e2       	ldi	r20, 0x25	; 37
  4f2:	52 e0       	ldi	r21, 0x02	; 2
  4f4:	60 e0       	ldi	r22, 0x00	; 0
@@ -1167,7 +1000,7 @@ int main(void)
 		
 		do
 		{
-			Is_pressed(BUTTON1_PORT , BUTTON1_PIN , &u8_a_commtrig);
+			Is_pressed(BTN1_PORT , BTN1_PIN , &u8_a_commtrig);
  51a:	45 e2       	ldi	r20, 0x25	; 37
  51c:	52 e0       	ldi	r21, 0x02	; 2
  51e:	60 e0       	ldi	r22, 0x00	; 0
@@ -1182,32 +1015,19 @@ int main(void)
 			
 		APP_sendcarddata(); /** START THE COMMUNICATION & SEND CARD DATA **/
  532:	0e 94 67 01 	call	0x2ce	; 0x2ce <APP_sendcarddata>
-//     while (1) 
-//     {
-// 		
-//     }
-
+	}
+	
 	}
  536:	80 e0       	ldi	r24, 0x00	; 0
  538:	90 e0       	ldi	r25, 0x00	; 0
  53a:	08 95       	ret
 
 0000053c <DIO_setpindir>:
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
-	
-	switch(u8_a_pindir) /** SWITCH CASE ON THE DIRECTION VALUE **/
  53c:	44 23       	and	r20, r20
  53e:	19 f0       	breq	.+6      	; 0x546 <DIO_setpindir+0xa>
  540:	41 30       	cpi	r20, 0x01	; 1
  542:	e9 f1       	breq	.+122    	; 0x5be <DIO_setpindir+0x82>
  544:	74 c0       	rjmp	.+232    	; 0x62e <DIO_setpindir+0xf2>
-	{
-		case DIO_PIN_INPUT:  /* INPUT CASE  */
-		
-		switch(u8_a_portid) /** SWITCH CASE ON THE PORT ID */
  546:	81 30       	cpi	r24, 0x01	; 1
  548:	99 f0       	breq	.+38     	; 0x570 <DIO_setpindir+0x34>
  54a:	28 f0       	brcs	.+10     	; 0x556 <DIO_setpindir+0x1a>
@@ -1216,9 +1036,6 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  550:	83 30       	cpi	r24, 0x03	; 3
  552:	41 f1       	breq	.+80     	; 0x5a4 <DIO_setpindir+0x68>
  554:	6e c0       	rjmp	.+220    	; 0x632 <DIO_setpindir+0xf6>
-		{
-			case DIO_PORTA:
-			clear_bit(DDRA , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTA AS INPUT PIN **/
  556:	2a b3       	in	r18, 0x1a	; 26
  558:	81 e0       	ldi	r24, 0x01	; 1
  55a:	90 e0       	ldi	r25, 0x00	; 0
@@ -1230,23 +1047,8 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  566:	80 95       	com	r24
  568:	82 23       	and	r24, r18
  56a:	8a bb       	out	0x1a, r24	; 26
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  56c:	80 e0       	ldi	r24, 0x00	; 0
-		
-		switch(u8_a_portid) /** SWITCH CASE ON THE PORT ID */
-		{
-			case DIO_PORTA:
-			clear_bit(DDRA , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTA AS INPUT PIN **/
-			break;
  56e:	08 95       	ret
-			
-			case DIO_PORTB:
-			clear_bit(DDRB , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTB AS INPUT PIN **/
  570:	27 b3       	in	r18, 0x17	; 23
  572:	81 e0       	ldi	r24, 0x01	; 1
  574:	90 e0       	ldi	r25, 0x00	; 0
@@ -1258,23 +1060,8 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  580:	80 95       	com	r24
  582:	82 23       	and	r24, r18
  584:	87 bb       	out	0x17, r24	; 23
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  586:	80 e0       	ldi	r24, 0x00	; 0
-			clear_bit(DDRA , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTA AS INPUT PIN **/
-			break;
-			
-			case DIO_PORTB:
-			clear_bit(DDRB , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTB AS INPUT PIN **/
-			break;
  588:	08 95       	ret
-			
-			case DIO_PORTC:
-			clear_bit(DDRC , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTC AS INPUT PIN **/
  58a:	24 b3       	in	r18, 0x14	; 20
  58c:	81 e0       	ldi	r24, 0x01	; 1
  58e:	90 e0       	ldi	r25, 0x00	; 0
@@ -1286,23 +1073,8 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  59a:	80 95       	com	r24
  59c:	82 23       	and	r24, r18
  59e:	84 bb       	out	0x14, r24	; 20
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  5a0:	80 e0       	ldi	r24, 0x00	; 0
-			clear_bit(DDRB , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTB AS INPUT PIN **/
-			break;
-			
-			case DIO_PORTC:
-			clear_bit(DDRC , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTC AS INPUT PIN **/
-			break;
  5a2:	08 95       	ret
-			
-			case DIO_PORTD:
-			clear_bit(DDRD , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTD AS INPUT PIN **/
  5a4:	21 b3       	in	r18, 0x11	; 17
  5a6:	81 e0       	ldi	r24, 0x01	; 1
  5a8:	90 e0       	ldi	r25, 0x00	; 0
@@ -1314,26 +1086,8 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  5b4:	80 95       	com	r24
  5b6:	82 23       	and	r24, r18
  5b8:	81 bb       	out	0x11, r24	; 17
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  5ba:	80 e0       	ldi	r24, 0x00	; 0
-			clear_bit(DDRC , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTC AS INPUT PIN **/
-			break;
-			
-			case DIO_PORTD:
-			clear_bit(DDRD , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTD AS INPUT PIN **/
-			break;
  5bc:	08 95       	ret
-		} 
-		break;
-		
-		case DIO_PIN_OUTPUT:  /* OUTPUT CASE  */
-		
-		switch(u8_a_portid) /** SWITCH CASE ON THE PORT ID */
  5be:	81 30       	cpi	r24, 0x01	; 1
  5c0:	91 f0       	breq	.+36     	; 0x5e6 <DIO_setpindir+0xaa>
  5c2:	28 f0       	brcs	.+10     	; 0x5ce <DIO_setpindir+0x92>
@@ -1342,9 +1096,6 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  5c8:	83 30       	cpi	r24, 0x03	; 3
  5ca:	29 f1       	breq	.+74     	; 0x616 <DIO_setpindir+0xda>
  5cc:	34 c0       	rjmp	.+104    	; 0x636 <DIO_setpindir+0xfa>
-		{
-			case DIO_PORTA:
-			set_bit(DDRA , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
  5ce:	2a b3       	in	r18, 0x1a	; 26
  5d0:	81 e0       	ldi	r24, 0x01	; 1
  5d2:	90 e0       	ldi	r25, 0x00	; 0
@@ -1355,23 +1106,8 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  5dc:	e2 f7       	brpl	.-8      	; 0x5d6 <DIO_setpindir+0x9a>
  5de:	82 2b       	or	r24, r18
  5e0:	8a bb       	out	0x1a, r24	; 26
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  5e2:	80 e0       	ldi	r24, 0x00	; 0
-		
-		switch(u8_a_portid) /** SWITCH CASE ON THE PORT ID */
-		{
-			case DIO_PORTA:
-			set_bit(DDRA , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
  5e4:	08 95       	ret
-			
-			case DIO_PORTB:
-			set_bit(DDRB , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
  5e6:	27 b3       	in	r18, 0x17	; 23
  5e8:	81 e0       	ldi	r24, 0x01	; 1
  5ea:	90 e0       	ldi	r25, 0x00	; 0
@@ -1382,23 +1118,8 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  5f4:	e2 f7       	brpl	.-8      	; 0x5ee <DIO_setpindir+0xb2>
  5f6:	82 2b       	or	r24, r18
  5f8:	87 bb       	out	0x17, r24	; 23
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  5fa:	80 e0       	ldi	r24, 0x00	; 0
-			set_bit(DDRA , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
-			
-			case DIO_PORTB:
-			set_bit(DDRB , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
  5fc:	08 95       	ret
-			
-			case DIO_PORTC:
-			set_bit(DDRC , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
  5fe:	24 b3       	in	r18, 0x14	; 20
  600:	81 e0       	ldi	r24, 0x01	; 1
  602:	90 e0       	ldi	r25, 0x00	; 0
@@ -1409,23 +1130,8 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  60c:	e2 f7       	brpl	.-8      	; 0x606 <DIO_setpindir+0xca>
  60e:	82 2b       	or	r24, r18
  610:	84 bb       	out	0x14, r24	; 20
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  612:	80 e0       	ldi	r24, 0x00	; 0
-			set_bit(DDRB , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
-			
-			case DIO_PORTC:
-			set_bit(DDRC , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
  614:	08 95       	ret
-			
-			case DIO_PORTD:
-			set_bit(DDRD , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
  616:	21 b3       	in	r18, 0x11	; 17
  618:	81 e0       	ldi	r24, 0x01	; 1
  61a:	90 e0       	ldi	r25, 0x00	; 0
@@ -1436,67 +1142,21 @@ PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t 
  624:	e2 f7       	brpl	.-8      	; 0x61e <DIO_setpindir+0xe2>
  626:	82 2b       	or	r24, r18
  628:	81 bb       	out	0x11, r24	; 17
-/* INPUT   : PORT , PINID , DIRECTION                             */
-/* RETURNS : PinDirection_t                                       */
-/******************************************************************/
-PinDirection_t DIO_setpindir(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pindir)
-{
-	PinDirection_t en_a_dirstate = VALID_DIRECTION ; /** VARIABLE TO RETURN THE STATUS OF DIRECTION **/
  62a:	80 e0       	ldi	r24, 0x00	; 0
-			set_bit(DDRC , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
-			
-			case DIO_PORTD:
-			set_bit(DDRD , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
  62c:	08 95       	ret
-		} 
-		break;
-		 
-		 
-		default:  /** DIRECTION ISN'T INPUT OR OUTPUT */
-		en_a_dirstate = NOT_VALID_DIRECTION ; /** RETURN AS DIR NOT VALID ERRORS **/
  62e:	81 e0       	ldi	r24, 0x01	; 1
  630:	08 95       	ret
-			case DIO_PORTD:
-			clear_bit(DDRD , u8_a_pinid);           /** CONFIGURE THIS PIN IN PORTD AS INPUT PIN **/
-			break;
-			
-			default: /** DO NOTHING **/
-			en_a_dirstate = NOT_VALID_DIRECTION ; /** RETURN AS DIR NOT VALID ERRORS **/
  632:	81 e0       	ldi	r24, 0x01	; 1
  634:	08 95       	ret
-			case DIO_PORTD:
-			set_bit(DDRD , u8_a_pinid);             /** CONFIGURE THIS PIN IN PORTA AS OUTPUT PIN **/
-			break;
-			
-			default:  /** DO NOTHING **/
-			en_a_dirstate = NOT_VALID_DIRECTION ; /** RETURN AS DIR NOT VALID ERRORS **/
  636:	81 e0       	ldi	r24, 0x01	; 1
-		en_a_dirstate = NOT_VALID_DIRECTION ; /** RETURN AS DIR NOT VALID ERRORS **/
-		break ; 
-	} 
-	
-	return en_a_dirstate ; /** RETURN THE STATE OF FUNCTION **/
-}
  638:	08 95       	ret
 
 0000063a <DIO_setpinvalue>:
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
-	
-	switch(u8_a_pinval)
  63a:	44 23       	and	r20, r20
  63c:	19 f0       	breq	.+6      	; 0x644 <DIO_setpinvalue+0xa>
  63e:	41 30       	cpi	r20, 0x01	; 1
  640:	e9 f1       	breq	.+122    	; 0x6bc <DIO_setpinvalue+0x82>
  642:	74 c0       	rjmp	.+232    	; 0x72c <DIO_setpinvalue+0xf2>
-	{
-		case DIO_PIN_LOW:  /** IN CASE PIN VALUE IS LOW */
-		
-		switch(u8_a_portid)  /** SWITCH CASE ON THE PORT ID */ 
  644:	81 30       	cpi	r24, 0x01	; 1
  646:	99 f0       	breq	.+38     	; 0x66e <DIO_setpinvalue+0x34>
  648:	28 f0       	brcs	.+10     	; 0x654 <DIO_setpinvalue+0x1a>
@@ -1505,9 +1165,6 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  64e:	83 30       	cpi	r24, 0x03	; 3
  650:	41 f1       	breq	.+80     	; 0x6a2 <DIO_setpinvalue+0x68>
  652:	6e c0       	rjmp	.+220    	; 0x730 <DIO_setpinvalue+0xf6>
-		{
-			case DIO_PORTA:
-			clear_bit(PORTA , u8_a_pinid);       /** SET THIS PIN AS LOW **/
  654:	2b b3       	in	r18, 0x1b	; 27
  656:	81 e0       	ldi	r24, 0x01	; 1
  658:	90 e0       	ldi	r25, 0x00	; 0
@@ -1519,23 +1176,8 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  664:	80 95       	com	r24
  666:	82 23       	and	r24, r18
  668:	8b bb       	out	0x1b, r24	; 27
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  66a:	80 e0       	ldi	r24, 0x00	; 0
-		
-		switch(u8_a_portid)  /** SWITCH CASE ON THE PORT ID */ 
-		{
-			case DIO_PORTA:
-			clear_bit(PORTA , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
  66c:	08 95       	ret
-			
-			case DIO_PORTB:
-			clear_bit(PORTB , u8_a_pinid);       /** SET THIS PIN AS LOW **/
  66e:	28 b3       	in	r18, 0x18	; 24
  670:	81 e0       	ldi	r24, 0x01	; 1
  672:	90 e0       	ldi	r25, 0x00	; 0
@@ -1547,23 +1189,8 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  67e:	80 95       	com	r24
  680:	82 23       	and	r24, r18
  682:	88 bb       	out	0x18, r24	; 24
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  684:	80 e0       	ldi	r24, 0x00	; 0
-			clear_bit(PORTA , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
-			
-			case DIO_PORTB:
-			clear_bit(PORTB , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
  686:	08 95       	ret
-			
-			case DIO_PORTC:
-			clear_bit(PORTC , u8_a_pinid);       /** SET THIS PIN AS LOW **/
  688:	25 b3       	in	r18, 0x15	; 21
  68a:	81 e0       	ldi	r24, 0x01	; 1
  68c:	90 e0       	ldi	r25, 0x00	; 0
@@ -1575,23 +1202,8 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  698:	80 95       	com	r24
  69a:	82 23       	and	r24, r18
  69c:	85 bb       	out	0x15, r24	; 21
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  69e:	80 e0       	ldi	r24, 0x00	; 0
-			clear_bit(PORTB , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
-			
-			case DIO_PORTC:
-			clear_bit(PORTC , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
  6a0:	08 95       	ret
-			
-			case DIO_PORTD:
-			clear_bit(PORTD , u8_a_pinid);       /** SET THIS PIN AS LOW **/
  6a2:	22 b3       	in	r18, 0x12	; 18
  6a4:	81 e0       	ldi	r24, 0x01	; 1
  6a6:	90 e0       	ldi	r25, 0x00	; 0
@@ -1603,26 +1215,8 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  6b2:	80 95       	com	r24
  6b4:	82 23       	and	r24, r18
  6b6:	82 bb       	out	0x12, r24	; 18
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  6b8:	80 e0       	ldi	r24, 0x00	; 0
-			clear_bit(PORTC , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
-			
-			case DIO_PORTD:
-			clear_bit(PORTD , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
  6ba:	08 95       	ret
-		} 
-		break;
-		
-		case DIO_PIN_HIGH:
-		
-		switch(u8_a_portid)
  6bc:	81 30       	cpi	r24, 0x01	; 1
  6be:	91 f0       	breq	.+36     	; 0x6e4 <DIO_setpinvalue+0xaa>
  6c0:	28 f0       	brcs	.+10     	; 0x6cc <DIO_setpinvalue+0x92>
@@ -1631,9 +1225,6 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  6c6:	83 30       	cpi	r24, 0x03	; 3
  6c8:	29 f1       	breq	.+74     	; 0x714 <DIO_setpinvalue+0xda>
  6ca:	34 c0       	rjmp	.+104    	; 0x734 <DIO_setpinvalue+0xfa>
-		{
-			case DIO_PORTA:
-			set_bit(PORTA , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
  6cc:	2b b3       	in	r18, 0x1b	; 27
  6ce:	81 e0       	ldi	r24, 0x01	; 1
  6d0:	90 e0       	ldi	r25, 0x00	; 0
@@ -1644,23 +1235,8 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  6da:	e2 f7       	brpl	.-8      	; 0x6d4 <DIO_setpinvalue+0x9a>
  6dc:	82 2b       	or	r24, r18
  6de:	8b bb       	out	0x1b, r24	; 27
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  6e0:	80 e0       	ldi	r24, 0x00	; 0
-		
-		switch(u8_a_portid)
-		{
-			case DIO_PORTA:
-			set_bit(PORTA , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
  6e2:	08 95       	ret
-			
-			case DIO_PORTB:
-			set_bit(PORTB , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
  6e4:	28 b3       	in	r18, 0x18	; 24
  6e6:	81 e0       	ldi	r24, 0x01	; 1
  6e8:	90 e0       	ldi	r25, 0x00	; 0
@@ -1671,23 +1247,8 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  6f2:	e2 f7       	brpl	.-8      	; 0x6ec <DIO_setpinvalue+0xb2>
  6f4:	82 2b       	or	r24, r18
  6f6:	88 bb       	out	0x18, r24	; 24
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  6f8:	80 e0       	ldi	r24, 0x00	; 0
-			set_bit(PORTA , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
-			
-			case DIO_PORTB:
-			set_bit(PORTB , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
  6fa:	08 95       	ret
-			
-			case DIO_PORTC:
-			set_bit(PORTC , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
  6fc:	25 b3       	in	r18, 0x15	; 21
  6fe:	81 e0       	ldi	r24, 0x01	; 1
  700:	90 e0       	ldi	r25, 0x00	; 0
@@ -1698,23 +1259,8 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  70a:	e2 f7       	brpl	.-8      	; 0x704 <DIO_setpinvalue+0xca>
  70c:	82 2b       	or	r24, r18
  70e:	85 bb       	out	0x15, r24	; 21
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  710:	80 e0       	ldi	r24, 0x00	; 0
-			set_bit(PORTB , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
-			
-			case DIO_PORTC:
-			set_bit(PORTC , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
  712:	08 95       	ret
-			
-			case DIO_PORTD:
-			set_bit(PORTD , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
  714:	22 b3       	in	r18, 0x12	; 18
  716:	81 e0       	ldi	r24, 0x01	; 1
  718:	90 e0       	ldi	r25, 0x00	; 0
@@ -1725,58 +1271,16 @@ PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8
  722:	e2 f7       	brpl	.-8      	; 0x71c <DIO_setpinvalue+0xe2>
  724:	82 2b       	or	r24, r18
  726:	82 bb       	out	0x12, r24	; 18
-/* RETURNS : PinValue_t                                           */
-/******************************************************************/
-PinValue_t DIO_setpinvalue(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t u8_a_pinval)
-{
-	
-	PinValue_t en_a_valstate = VALID_VALUE ; /** VARIABLE TO RETURN THE STATUS OF VALUE **/ 
  728:	80 e0       	ldi	r24, 0x00	; 0
-			set_bit(PORTC , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
-			
-			case DIO_PORTD:
-			set_bit(PORTD , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
  72a:	08 95       	ret
-			break;
-		} 
-		break;
-		
-		default :
-		en_a_valstate = NOT_VALID_VALUE ;  /** RETURN VALUE AS NOT VALID **/
  72c:	81 e0       	ldi	r24, 0x01	; 1
  72e:	08 95       	ret
-			case DIO_PORTD:
-			clear_bit(PORTD , u8_a_pinid);       /** SET THIS PIN AS LOW **/
-			break;
-			
-			default:
-			en_a_valstate = NOT_VALID_VALUE ;  /** RETURN VALUE AS NOT VALID **/
  730:	81 e0       	ldi	r24, 0x01	; 1
  732:	08 95       	ret
-			case DIO_PORTD:
-			set_bit(PORTD , u8_a_pinid);         /** SET THIS PIN AS HIGH  **/
-			break;
-			
-			default:
-			en_a_valstate = NOT_VALID_VALUE ;  /** RETURN VALUE AS NOT VALID **/
  734:	81 e0       	ldi	r24, 0x01	; 1
-		en_a_valstate = NOT_VALID_VALUE ;  /** RETURN VALUE AS NOT VALID **/
-		break ;
-	} 
-	
-	return en_a_valstate ; /** RETURN THE FINAL STATE OF THE FUNCTION */
-}
  736:	08 95       	ret
 
 00000738 <DIO_readpin>:
-/******************************************************************/
-PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_val)
-{
-	PinRead_t en_a_Pinstate = VALID_READ ;  /** VARIABLE TO HOLD THE FUNCTION ERROR STATE */
-	
-	switch(u8_a_portid)  /** SWITCH CASE ON PORT ID **/
  738:	81 30       	cpi	r24, 0x01	; 1
  73a:	99 f0       	breq	.+38     	; 0x762 <DIO_readpin+0x2a>
  73c:	28 f0       	brcs	.+10     	; 0x748 <DIO_readpin+0x10>
@@ -1785,9 +1289,6 @@ PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_v
  742:	83 30       	cpi	r24, 0x03	; 3
  744:	41 f1       	breq	.+80     	; 0x796 <DIO_readpin+0x5e>
  746:	34 c0       	rjmp	.+104    	; 0x7b0 <DIO_readpin+0x78>
-	{
-		case DIO_PORTA:               /** PORTA  **/
-		*u8_a_val = get_bit(PINA , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
  748:	89 b3       	in	r24, 0x19	; 25
  74a:	90 e0       	ldi	r25, 0x00	; 0
  74c:	02 c0       	rjmp	.+4      	; 0x752 <DIO_readpin+0x1a>
@@ -1799,23 +1300,8 @@ PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_v
  758:	89 bb       	out	0x19, r24	; 25
  75a:	fa 01       	movw	r30, r20
  75c:	80 83       	st	Z, r24
-/* INPUT   : u8_a_portid , PINID , POINTER TO SET THE VALUE IN IT      */
-/* RETURNS : PinRead_t                                            */
-/******************************************************************/
-PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_val)
-{
-	PinRead_t en_a_Pinstate = VALID_READ ;  /** VARIABLE TO HOLD THE FUNCTION ERROR STATE */
  75e:	80 e0       	ldi	r24, 0x00	; 0
-	
-	switch(u8_a_portid)  /** SWITCH CASE ON PORT ID **/
-	{
-		case DIO_PORTA:               /** PORTA  **/
-		*u8_a_val = get_bit(PINA , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
-		break;
  760:	08 95       	ret
-		
-		case DIO_PORTB:               /** PORTB  **/
-		*u8_a_val = get_bit(PINB , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
  762:	86 b3       	in	r24, 0x16	; 22
  764:	90 e0       	ldi	r25, 0x00	; 0
  766:	02 c0       	rjmp	.+4      	; 0x76c <DIO_readpin+0x34>
@@ -1827,23 +1313,8 @@ PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_v
  772:	86 bb       	out	0x16, r24	; 22
  774:	fa 01       	movw	r30, r20
  776:	80 83       	st	Z, r24
-/* INPUT   : u8_a_portid , PINID , POINTER TO SET THE VALUE IN IT      */
-/* RETURNS : PinRead_t                                            */
-/******************************************************************/
-PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_val)
-{
-	PinRead_t en_a_Pinstate = VALID_READ ;  /** VARIABLE TO HOLD THE FUNCTION ERROR STATE */
  778:	80 e0       	ldi	r24, 0x00	; 0
-		*u8_a_val = get_bit(PINA , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
-		break;
-		
-		case DIO_PORTB:               /** PORTB  **/
-		*u8_a_val = get_bit(PINB , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
-		break;
  77a:	08 95       	ret
-		
-		case DIO_PORTC:               /** PORTC  **/
-		*u8_a_val = get_bit(PINC , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
  77c:	83 b3       	in	r24, 0x13	; 19
  77e:	90 e0       	ldi	r25, 0x00	; 0
  780:	02 c0       	rjmp	.+4      	; 0x786 <DIO_readpin+0x4e>
@@ -1855,23 +1326,8 @@ PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_v
  78c:	83 bb       	out	0x13, r24	; 19
  78e:	fa 01       	movw	r30, r20
  790:	80 83       	st	Z, r24
-/* INPUT   : u8_a_portid , PINID , POINTER TO SET THE VALUE IN IT      */
-/* RETURNS : PinRead_t                                            */
-/******************************************************************/
-PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_val)
-{
-	PinRead_t en_a_Pinstate = VALID_READ ;  /** VARIABLE TO HOLD THE FUNCTION ERROR STATE */
  792:	80 e0       	ldi	r24, 0x00	; 0
-		*u8_a_val = get_bit(PINB , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
-		break;
-		
-		case DIO_PORTC:               /** PORTC  **/
-		*u8_a_val = get_bit(PINC , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
-		break;
  794:	08 95       	ret
-		
-		case DIO_PORTD:               /** PORTD  **/
-		*u8_a_val = get_bit(PIND , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
  796:	80 b3       	in	r24, 0x10	; 16
  798:	90 e0       	ldi	r25, 0x00	; 0
  79a:	02 c0       	rjmp	.+4      	; 0x7a0 <DIO_readpin+0x68>
@@ -1883,38 +1339,12 @@ PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_v
  7a6:	80 bb       	out	0x10, r24	; 16
  7a8:	fa 01       	movw	r30, r20
  7aa:	80 83       	st	Z, r24
-/* INPUT   : u8_a_portid , PINID , POINTER TO SET THE VALUE IN IT      */
-/* RETURNS : PinRead_t                                            */
-/******************************************************************/
-PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_val)
-{
-	PinRead_t en_a_Pinstate = VALID_READ ;  /** VARIABLE TO HOLD THE FUNCTION ERROR STATE */
  7ac:	80 e0       	ldi	r24, 0x00	; 0
-		*u8_a_val = get_bit(PINC , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
-		break;
-		
-		case DIO_PORTD:               /** PORTD  **/
-		*u8_a_val = get_bit(PIND , u8_a_pinid); /** GET THE VALUE OF THE BIT **/
-		break;
  7ae:	08 95       	ret
-		
-		default:
-		en_a_Pinstate = NOT_VALID_READ ;  /** READ IS NOT VALID  **/
  7b0:	81 e0       	ldi	r24, 0x01	; 1
-		break;
-	} 
-	
-	return en_a_Pinstate ; /** RETURN THE FINAL STATE OF THE FUNCTION **/	
-}
  7b2:	08 95       	ret
 
 000007b4 <TWI_init>:
-    /** Wait for TWINT flag set in TWCR Register (start bit is send successfully) **/
-    while(BIT_IS_CLEAR(TWCR,TWINT));
-	
-    /** READ DATA **/
-    return TWDR;
-}
  7b4:	82 e0       	ldi	r24, 0x02	; 2
  7b6:	80 b9       	out	0x00, r24	; 0
  7b8:	11 b8       	out	0x01, r1	; 1
@@ -1931,83 +1361,34 @@ PinRead_t DIO_readpin(uint8_t u8_a_portid , uint8_t u8_a_pinid , uint8_t* u8_a_v
  7ca:	08 95       	ret
 
 000007cc <TWI_readwithnack>:
-	/************************************************/
-	/* CLEAR THE TWINT FLAG                        **/
-	/* DISABLE ACK BIT AFTER READING THE DATA      **/
-	/* ENABLE TWI MODULE                           **/
-	/************************************************/
-	TWCR = (1 << TWINT) | (1 << TWEN) ;
  7cc:	84 e8       	ldi	r24, 0x84	; 132
  7ce:	86 bf       	out	0x36, r24	; 54
-	
-	/** Wait for TWINT flag set in TWCR Register (start bit is send successfully) **/
-	while(BIT_IS_CLEAR(TWCR,TWINT));
  7d0:	06 b6       	in	r0, 0x36	; 54
  7d2:	07 fe       	sbrs	r0, 7
  7d4:	fd cf       	rjmp	.-6      	; 0x7d0 <TWI_readwithnack+0x4>
-	
-	/** READ DATA **/
-	return TWDR;
  7d6:	83 b1       	in	r24, 0x03	; 3
-}
  7d8:	08 95       	ret
 
 000007da <TWI_write>:
-/** RETURNS   : VOID                                    **/
-/*********************************************************/
-void TWI_write(uint8_t u8_a_data)
-{
-	/** PREPARE DATA FOR SENDING **/
-    TWDR = u8_a_data;
  7da:	83 b9       	out	0x03, r24	; 3
-    
-	/***************************************/ 
-	/** CLEAR THE TWINT FLAG              **/
-	/** ENABLE TWI MODULE                 **/
-	/***************************************/ 
-    TWCR = (1 << TWINT) | (1 << TWEN);
  7dc:	84 e8       	ldi	r24, 0x84	; 132
  7de:	86 bf       	out	0x36, r24	; 54
-	
-    /** Wait for TWINT flag set in TWCR Register (start bit is send successfully) **/
-    while(BIT_IS_CLEAR(TWCR,TWINT));
  7e0:	06 b6       	in	r0, 0x36	; 54
  7e2:	07 fe       	sbrs	r0, 7
  7e4:	fd cf       	rjmp	.-6      	; 0x7e0 <TWI_write+0x6>
-}
  7e6:	08 95       	ret
 
 000007e8 <TWI_stop>:
-	/****************************************/ 
-	/** CLEAR THE TWINT FLAG               **/
-	/** SEND STIOP BIT EVENT               **/
-	/** ENABLE TWI MODULE                  **/
-	/****************************************/
-    TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEN);
  7e8:	84 e9       	ldi	r24, 0x94	; 148
  7ea:	86 bf       	out	0x36, r24	; 54
  7ec:	08 95       	ret
 
 000007ee <TWI_getstatus>:
-uint8_t TWI_getstatus(void)
-{
-	uint8_t u8_a_status ; /** VARIABLE TO HOLD THE STATUS CODE VALUE **/
-	
-	/** MASKING THE FIRST THREE BITS TO GET THE LAST 5 BITS ONLY **/
-	u8_a_status = TWSR & 0xF8;
  7ee:	81 b1       	in	r24, 0x01	; 1
-	
-	return u8_a_status;
  7f0:	88 7f       	andi	r24, 0xF8	; 248
  7f2:	08 95       	ret
 
 000007f4 <SPI_initmaster>:
-{
-	while( (SPI->SPSR &  (1 << 7)) == 0); /** WAIT UNTILL THE RECEIPTION FLAG RAISED **/
-	
-	*u8_a_recdata = SPI->SPDR ; /** SAVE THE DATA FROM SPDR **/
-	
-}
  7f4:	41 e0       	ldi	r20, 0x01	; 1
  7f6:	64 e0       	ldi	r22, 0x04	; 4
  7f8:	81 e0       	ldi	r24, 0x01	; 1
@@ -2077,146 +1458,71 @@ uint8_t TWI_getstatus(void)
  878:	08 95       	ret
 
 0000087a <SPI_sendstring>:
-/** FUNCTION FOR MASTER TO SEND STRING                          **/
-/** ARGUMENTS  : u8_a_str (string)                              **/
-/** RETURNS    : en_a_spierrstatus                              **/
-/*****************************************************************/
-en_a_spierrstatus SPI_sendstring(const uint8_t * u8_a_str)
-{
  87a:	0f 93       	push	r16
  87c:	1f 93       	push	r17
  87e:	cf 93       	push	r28
  880:	8c 01       	movw	r16, r24
-	uint8_t u8_L_counter = 0 ; /** COUNTER FOR STRING LETTERS **/
  882:	c0 e0       	ldi	r28, 0x00	; 0
-	
-	while (u8_a_str[u8_L_counter] != '\0')
  884:	03 c0       	rjmp	.+6      	; 0x88c <SPI_sendstring+0x12>
-	{
-		SPI_sendbyte(u8_a_str[u8_L_counter]); /** SEND CHARACTER **/
  886:	0e 94 39 04 	call	0x872	; 0x872 <SPI_sendbyte>
-		
-		u8_L_counter++; /* MOVE TO THE SECOND LETTER */
  88a:	cf 5f       	subi	r28, 0xFF	; 255
-/*****************************************************************/
-en_a_spierrstatus SPI_sendstring(const uint8_t * u8_a_str)
-{
-	uint8_t u8_L_counter = 0 ; /** COUNTER FOR STRING LETTERS **/
-	
-	while (u8_a_str[u8_L_counter] != '\0')
  88c:	f8 01       	movw	r30, r16
  88e:	ec 0f       	add	r30, r28
  890:	f1 1d       	adc	r31, r1
  892:	80 81       	ld	r24, Z
  894:	81 11       	cpse	r24, r1
  896:	f7 cf       	rjmp	.-18     	; 0x886 <SPI_sendstring+0xc>
-	{
-		SPI_sendbyte(u8_a_str[u8_L_counter]); /** SEND CHARACTER **/
-		
-		u8_L_counter++; /* MOVE TO THE SECOND LETTER */
-	}
-}
  898:	cf 91       	pop	r28
  89a:	1f 91       	pop	r17
  89c:	0f 91       	pop	r16
  89e:	08 95       	ret
 
 000008a0 <TMR0_init>:
-	 /* TIMER MODE OF TMR0 */
-	#elif TIMER0_CLK_SRC == INTERNAL_CLK_SRC
-	
-	 #if TIMER0_MODE == TMR0_NORMAL_MODE
-	 
-	 clear_bit(TCCR0 , 7);
  8a0:	83 b7       	in	r24, 0x33	; 51
  8a2:	8f 77       	andi	r24, 0x7F	; 127
  8a4:	83 bf       	out	0x33, r24	; 51
-	 clear_bit(TCCR0 , 6);
  8a6:	83 b7       	in	r24, 0x33	; 51
  8a8:	8f 7b       	andi	r24, 0xBF	; 191
  8aa:	83 bf       	out	0x33, r24	; 51
-	 clear_bit(TCCR0 , 3);
  8ac:	83 b7       	in	r24, 0x33	; 51
  8ae:	87 7f       	andi	r24, 0xF7	; 247
  8b0:	83 bf       	out	0x33, r24	; 51
-	 clear_bit(TCCR0 , 4);
  8b2:	83 b7       	in	r24, 0x33	; 51
  8b4:	8f 7e       	andi	r24, 0xEF	; 239
  8b6:	83 bf       	out	0x33, r24	; 51
-	 clear_bit(TCCR0 , 5);
  8b8:	83 b7       	in	r24, 0x33	; 51
  8ba:	8f 7d       	andi	r24, 0xDF	; 223
  8bc:	83 bf       	out	0x33, r24	; 51
-	  #endif
-	 #endif
-	#endif
-	
-	return en_a_initstatus ; /** RETURN THE STATUS OF INITIALIZATION **/
-}
  8be:	80 e0       	ldi	r24, 0x00	; 0
  8c0:	08 95       	ret
 
 000008c2 <TMR0_start>:
-{
-	TMR0_start_error en_a_startstatus = VALID_START ; /** VARIABLE TO RETURN THE STATUS OF START **/
-	
-	#if TIMER0_PRESCALER_VAL == PRESCALER_1024
-	
-	set_bit(TCCR0 , 0);
  8c2:	83 b7       	in	r24, 0x33	; 51
  8c4:	81 60       	ori	r24, 0x01	; 1
  8c6:	83 bf       	out	0x33, r24	; 51
-	clear_bit(TCCR0 , 1);
  8c8:	83 b7       	in	r24, 0x33	; 51
  8ca:	8d 7f       	andi	r24, 0xFD	; 253
  8cc:	83 bf       	out	0x33, r24	; 51
-	set_bit(TCCR0 , 2);
  8ce:	83 b7       	in	r24, 0x33	; 51
  8d0:	84 60       	ori	r24, 0x04	; 4
  8d2:	83 bf       	out	0x33, r24	; 51
-	en_a_startstatus = VALID_START ; /** START DONE PROBERLY **/
-	
-	#endif
-	
-	return en_a_startstatus ; /** RETURN THE STATUS **/
-}
  8d4:	80 e0       	ldi	r24, 0x00	; 0
  8d6:	08 95       	ret
 
 000008d8 <TMR0_stop>:
-TMR0_stop_error TMR0_stop(void)
-{
-	TMR0_stop_error en_a_stopStatus = VALID_STOP ; /** VARIABLE TO RETURN THE STATUS **/
-	
-	/** SET CONFIGURATIONS AS NO CLOCK SOURCE **/
-	clear_bit(TCCR0 , 0);
  8d8:	83 b7       	in	r24, 0x33	; 51
  8da:	8e 7f       	andi	r24, 0xFE	; 254
  8dc:	83 bf       	out	0x33, r24	; 51
-	clear_bit(TCCR0 , 1);
  8de:	83 b7       	in	r24, 0x33	; 51
  8e0:	8d 7f       	andi	r24, 0xFD	; 253
  8e2:	83 bf       	out	0x33, r24	; 51
-	clear_bit(TCCR0 , 2);
  8e4:	83 b7       	in	r24, 0x33	; 51
  8e6:	8b 7f       	andi	r24, 0xFB	; 251
  8e8:	83 bf       	out	0x33, r24	; 51
-	
-	en_a_stopStatus = VALID_STOP ; /** STOP DONE PROPERLY **/
-	
-	return en_a_stopStatus ; /** RETURN THE STATUS **/
-	
-}
  8ea:	80 e0       	ldi	r24, 0x00	; 0
  8ec:	08 95       	ret
 
 000008ee <TMR0_delayms>:
-	/******************************************************************************************/
-	/**               THIS CALCULATIONS CONFIGURED AS F_CPU   16 MHZ                         **/
-	/******************************************************************************************/
-	#if TIMER0_PRESCALER_VAL == PRESCALER_1024  /** CHECK THE PRESCALLER FROM CONFIG FILE **/
-	 
-        u32_gs_tmr0nuofovs = (u32_a_delayms / 16.384);   /** CALCULATING NUMBER OF OVERFLOWS ( DESIRED DELAY / TIME OF OVER FLOW ) **/ 
  8ee:	0e 94 bf 05 	call	0xb7e	; 0xb7e <__floatunsisf>
  8f2:	2f e6       	ldi	r18, 0x6F	; 111
  8f4:	32 e1       	ldi	r19, 0x12	; 18
@@ -2228,54 +1534,22 @@ TMR0_stop_error TMR0_stop(void)
  906:	70 93 27 02 	sts	0x0227, r23	; 0x800227 <u32_gs_tmr0nuofovs+0x1>
  90a:	80 93 28 02 	sts	0x0228, r24	; 0x800228 <u32_gs_tmr0nuofovs+0x2>
  90e:	90 93 29 02 	sts	0x0229, r25	; 0x800229 <u32_gs_tmr0nuofovs+0x3>
-	
-        TCNT0 = 0 ;   /** SET THE INITIAL VALUE IN TCNT0 REGISTER **/
  912:	12 be       	out	0x32, r1	; 50
-	
-	    en_a_delaystatus = VALID_DELAY ; /** VALID DELAY CONFIGURATIN **/
-	
-	#endif
-	
-	TMR0_start(); /** START TMR0 PRESCALLER **/
  914:	0e 94 61 04 	call	0x8c2	; 0x8c2 <TMR0_start>
-/** RETURNS    : TMR0_delay                                                    */
-/*******************************************************************************/
-TMR0_delay_error TMR0_delayms(uint32_t u32_a_delayms)
-{
-	
-	uint32_t u32_a_overflowcounter = 0 ;
  918:	40 e0       	ldi	r20, 0x00	; 0
  91a:	50 e0       	ldi	r21, 0x00	; 0
  91c:	ba 01       	movw	r22, r20
-	
-	#endif
-	
-	TMR0_start(); /** START TMR0 PRESCALLER **/
-	
-	while ( u32_a_overflowcounter < u32_gs_tmr0nuofovs ) /** STUCK IN THIS LOOP UNTILL THIS CONDITION IS FALSE **/
  91e:	0a c0       	rjmp	.+20     	; 0x934 <TMR0_delayms+0x46>
-	{
-		while((TIFR & (1 << 0)) == 0); /** DO NOTHING UNTILL THIS FLAG RAISED (OVERFLOW HAPPENED) **/
  920:	08 b6       	in	r0, 0x38	; 56
  922:	00 fe       	sbrs	r0, 0
  924:	fd cf       	rjmp	.-6      	; 0x920 <TMR0_delayms+0x32>
-		
-		set_bit(TIFR , 0);        /** CLEAR THE FLAG BY SOFTWARE **/
  926:	88 b7       	in	r24, 0x38	; 56
  928:	81 60       	ori	r24, 0x01	; 1
  92a:	88 bf       	out	0x38, r24	; 56
-		
-		u32_a_overflowcounter++ ; /** INCREASE THE OVERFLOWS BY ONE **/
  92c:	4f 5f       	subi	r20, 0xFF	; 255
  92e:	5f 4f       	sbci	r21, 0xFF	; 255
  930:	6f 4f       	sbci	r22, 0xFF	; 255
  932:	7f 4f       	sbci	r23, 0xFF	; 255
-	
-	#endif
-	
-	TMR0_start(); /** START TMR0 PRESCALLER **/
-	
-	while ( u32_a_overflowcounter < u32_gs_tmr0nuofovs ) /** STUCK IN THIS LOOP UNTILL THIS CONDITION IS FALSE **/
  934:	80 91 26 02 	lds	r24, 0x0226	; 0x800226 <u32_gs_tmr0nuofovs>
  938:	90 91 27 02 	lds	r25, 0x0227	; 0x800227 <u32_gs_tmr0nuofovs+0x1>
  93c:	a0 91 28 02 	lds	r26, 0x0228	; 0x800228 <u32_gs_tmr0nuofovs+0x2>
@@ -2285,275 +1559,115 @@ TMR0_delay_error TMR0_delayms(uint32_t u32_a_delayms)
  948:	6a 07       	cpc	r22, r26
  94a:	7b 07       	cpc	r23, r27
  94c:	48 f3       	brcs	.-46     	; 0x920 <TMR0_delayms+0x32>
-		set_bit(TIFR , 0);        /** CLEAR THE FLAG BY SOFTWARE **/
-		
-		u32_a_overflowcounter++ ; /** INCREASE THE OVERFLOWS BY ONE **/
-	}
-	
-	u32_gs_tmr0nuofovs = 0 ; /** REINTIALIZE THE OVERFLOWS COUNTER TO 0 AGAIN **/
  94e:	10 92 26 02 	sts	0x0226, r1	; 0x800226 <u32_gs_tmr0nuofovs>
  952:	10 92 27 02 	sts	0x0227, r1	; 0x800227 <u32_gs_tmr0nuofovs+0x1>
  956:	10 92 28 02 	sts	0x0228, r1	; 0x800228 <u32_gs_tmr0nuofovs+0x2>
  95a:	10 92 29 02 	sts	0x0229, r1	; 0x800229 <u32_gs_tmr0nuofovs+0x3>
-
-	TMR0_stop();   /** STOP TMR0 TOSTART FROM 0 WHEN IT CALLED AGAIN **/
  95e:	0e 94 6c 04 	call	0x8d8	; 0x8d8 <TMR0_stop>
-	
-	return en_a_delaystatus ; /** RETURN THE STATUS **/
-}
  962:	80 e0       	ldi	r24, 0x00	; 0
  964:	08 95       	ret
 
 00000966 <UART_init>:
-/** RETURNS   : uart_errorstatus                             **/
-/**************************************************************/
-uart_errorstatus UART_init(void)
-{
-		/** SET DIRECTIONS OF TX AND RX PINS **/
-		DIO_setpindir(DIO_PORTD , DIO_PIN1 , DIO_PIN_OUTPUT);  /** SET TX PIN AS OUTPUT **/
  966:	41 e0       	ldi	r20, 0x01	; 1
  968:	61 e0       	ldi	r22, 0x01	; 1
  96a:	83 e0       	ldi	r24, 0x03	; 3
  96c:	0e 94 9e 02 	call	0x53c	; 0x53c <DIO_setpindir>
-		DIO_setpindir(DIO_PORTD , DIO_PIN0 , DIO_PIN_INPUT);   /** SET RX PIN AS INPUT  **/
  970:	40 e0       	ldi	r20, 0x00	; 0
  972:	60 e0       	ldi	r22, 0x00	; 0
  974:	83 e0       	ldi	r24, 0x03	; 3
  976:	0e 94 9e 02 	call	0x53c	; 0x53c <DIO_setpindir>
-// 		UBRRH = 0 ;
-		
-		#if BAUDRATE_VALUE == BAUDRATE_9600
-		uint32_t u32_a_BRVALUE = 0; /** VARIABLE TO HOLD THE VALUE TO BE STORED IN UBRRL **/
-		u32_a_BRVALUE = ((80000) / (16 * 96)) - 1; /** CALCULATE THE UBRRL VALUE **/
-		UBRRL = u32_a_BRVALUE;       /** ASSIGN UBRRL **/
  97a:	83 e3       	ldi	r24, 0x33	; 51
  97c:	89 b9       	out	0x09, r24	; 9
-		u32_a_BRVALUE = ((16000000) / (16 * 115200)) - 1; /** CALCULATE THE UBRRL VALUE **/
-		UBRRL = u32_a_BRVALUE ;       /** ASSIGN UBRRL **/
-		#endif
-		
-		/** ENABLE TRANSMISSION AND RECEIVING **/
-		set_bit(UCSRB , 3);
  97e:	8a b1       	in	r24, 0x0a	; 10
  980:	88 60       	ori	r24, 0x08	; 8
  982:	8a b9       	out	0x0a, r24	; 10
-		set_bit(UCSRB , 4);
  984:	8a b1       	in	r24, 0x0a	; 10
  986:	80 61       	ori	r24, 0x10	; 16
  988:	8a b9       	out	0x0a, r24	; 10
-		
-		/** SELECT THE FIRST BIT TO WRITE TO THE UCSRC REGISTER **/
- 		set_bit(UCSRC , 7);
  98a:	80 b5       	in	r24, 0x20	; 32
  98c:	80 68       	ori	r24, 0x80	; 128
  98e:	80 bd       	out	0x20, r24	; 32
-		clear_bit(UCSRC , 1);
-		set_bit(UCSRC , 2);
-		clear_bit(UCSRB , 2);
-		
-		#elif CHARACTER_SIZE == CHAR_SIZE_8BIT
-		set_bit(UCSRC , 1);
  990:	80 b5       	in	r24, 0x20	; 32
  992:	82 60       	ori	r24, 0x02	; 2
  994:	80 bd       	out	0x20, r24	; 32
-		set_bit(UCSRC , 2);
  996:	80 b5       	in	r24, 0x20	; 32
  998:	84 60       	ori	r24, 0x04	; 4
  99a:	80 bd       	out	0x20, r24	; 32
-		clear_bit(UCSRB , 2);
  99c:	8a b1       	in	r24, 0x0a	; 10
  99e:	8b 7f       	andi	r24, 0xFB	; 251
  9a0:	8a b9       	out	0x0a, r24	; 10
-		set_bit(UCSRB , 2);
-		#endif
-		
-		
-		#if PARITY_BIT_MODE == DISABLE_PARITY_BIT
-		clear_bit(UCSRC , 4);
  9a2:	80 b5       	in	r24, 0x20	; 32
  9a4:	8f 7e       	andi	r24, 0xEF	; 239
  9a6:	80 bd       	out	0x20, r24	; 32
-		clear_bit(UCSRC , 5);
  9a8:	80 b5       	in	r24, 0x20	; 32
  9aa:	8f 7d       	andi	r24, 0xDF	; 223
  9ac:	80 bd       	out	0x20, r24	; 32
-		set_bit(UCSRC , 4);
-		set_bit(UCSRC , 5);
-		#endif
-		
-		#if STOP_BITS == ONE_STOP_BIT
-		clear_bit(UCSRC , 3);
  9ae:	80 b5       	in	r24, 0x20	; 32
  9b0:	87 7f       	andi	r24, 0xF7	; 247
  9b2:	80 bd       	out	0x20, r24	; 32
-		set_bit(UCSRC , 3);
-		#endif
-		
-		/** SET THE UART SYNCRONYZATION MODE **/
-		#if UART_MODE == ASYNCRONOUS_MODE
-		    clear_bit(UCSRC , 6);
  9b4:	80 b5       	in	r24, 0x20	; 32
  9b6:	8f 7b       	andi	r24, 0xBF	; 191
  9b8:	80 bd       	out	0x20, r24	; 32
-		
-		#if DOUBLE_SPEED_MODE == ENABLE_DOUBLE_SPEED_MODE
-		    set_bit(UCSRA , 1);
-		
-		#elif DOUBLE_SPEED_MODE == DISABLE_DOUBLE_SPEED_MODE
-		     clear_bit(UCSRA , 1);
  9ba:	8b b1       	in	r24, 0x0b	; 11
  9bc:	8d 7f       	andi	r24, 0xFD	; 253
  9be:	8b b9       	out	0x0b, r24	; 11
-		
-		#if MULTI_PROCESSOR_MODE == ENABLE_MULTIPROCESSOR_MODE
-		    set_bit(UCSRA , 0);
-		
-		#elif MULTI_PROCESSOR_MODE == DISABLE_MULTIPROCESSOR_MODE
-		     clear_bit(UCSRA , 0);
  9c0:	8b b1       	in	r24, 0x0b	; 11
  9c2:	8e 7f       	andi	r24, 0xFE	; 254
  9c4:	8b b9       	out	0x0b, r24	; 11
-		
-		#if RECEIVING_INTERRUPT == ENABLE_RECEIVING_INTERRUPT
-     		set_bit(UCSRB , 7);
-		
-		#elif RECEIVING_INTERRUPT == DISABLE_RECEIVING_INTERRUPT	
-		      clear_bit(UCSRB , 7);
  9c6:	8a b1       	in	r24, 0x0a	; 10
  9c8:	8f 77       	andi	r24, 0x7F	; 127
  9ca:	8a b9       	out	0x0a, r24	; 10
-
-		#if TRANSMITTING_INTERRUPT == ENABLE_TRANSMITTING_INTERRUPT
-     		set_bit(UCSRB , 6);
-		
-		#elif TRANSMITTING_INTERRUPT == DISABLE_TRANSMITTING_INTERRUPT	
-		    clear_bit(UCSRB , 6);
  9cc:	8a b1       	in	r24, 0x0a	; 10
  9ce:	8f 7b       	andi	r24, 0xBF	; 191
  9d0:	8a b9       	out	0x0a, r24	; 10
-		
-		#if UDR_INTERRUPT == ENABLE_UDR_INTERRUPT
-		    set_bit(UCSRB , 5);
-		
-		#elif UDR_INTERRUPT == DISABLE_UDR_INTERRUPT
-		    clear_bit(UCSRB , 5);
  9d2:	8a b1       	in	r24, 0x0a	; 10
  9d4:	8f 7d       	andi	r24, 0xDF	; 223
  9d6:	8a b9       	out	0x0a, r24	; 10
-		#endif
-		
-}
  9d8:	08 95       	ret
 
 000009da <UART_sendchar>:
-/** ARGUMENTS : ua_a_data                                    **/
-/** RETURNS   : uart_errorstatus                             **/
-/**************************************************************/
-uart_errorstatus UART_sendchar(uint8_t ua_a_data)
-{
-	while( ! ( UCSRA & (1 <<5))); /** HOLD HERE UNTILL DATA REGISTER IS EMPTY (DATA SENT) **/
  9da:	5d 9b       	sbis	0x0b, 5	; 11
  9dc:	fe cf       	rjmp	.-4      	; 0x9da <UART_sendchar>
-    
-	UDR = ua_a_data ; /** STORE THE DATA IN THE UDR BUFFER TO BE SENT **/
  9de:	8c b9       	out	0x0c, r24	; 12
-	
-}
  9e0:	08 95       	ret
 
 000009e2 <UART_sendstr>:
-/** FUNCTION TO SEND STRING VIA UART                         **/
-/** ARGUMENTS : ua_a_string                                  **/
-/** RETURNS   : uart_errorstatus                             **/
-/**************************************************************/
-uart_errorstatus UART_sendstr(uint8_t * ua_a_string)
-{
  9e2:	0f 93       	push	r16
  9e4:	1f 93       	push	r17
  9e6:	cf 93       	push	r28
  9e8:	8c 01       	movw	r16, r24
-	uint8_t u8_a_lettercounter = 0 ; /** LETTERS COUNTER **/
  9ea:	c0 e0       	ldi	r28, 0x00	; 0
-		
-	while (ua_a_string[u8_a_lettercounter] != '\0')  /** UNTILL THE STRING ISN'T NULL **/
  9ec:	03 c0       	rjmp	.+6      	; 0x9f4 <UART_sendstr+0x12>
-	{
-		UART_sendchar(ua_a_string[u8_a_lettercounter]); /** SEND THE LETTER USING UART_sendchar **/
  9ee:	0e 94 ed 04 	call	0x9da	; 0x9da <UART_sendchar>
-		u8_a_lettercounter++; /** JUMP TO THE NEXT LETTER **/
  9f2:	cf 5f       	subi	r28, 0xFF	; 255
-/**************************************************************/
-uart_errorstatus UART_sendstr(uint8_t * ua_a_string)
-{
-	uint8_t u8_a_lettercounter = 0 ; /** LETTERS COUNTER **/
-		
-	while (ua_a_string[u8_a_lettercounter] != '\0')  /** UNTILL THE STRING ISN'T NULL **/
  9f4:	f8 01       	movw	r30, r16
  9f6:	ec 0f       	add	r30, r28
  9f8:	f1 1d       	adc	r31, r1
  9fa:	80 81       	ld	r24, Z
  9fc:	81 11       	cpse	r24, r1
  9fe:	f7 cf       	rjmp	.-18     	; 0x9ee <UART_sendstr+0xc>
-	{
-		UART_sendchar(ua_a_string[u8_a_lettercounter]); /** SEND THE LETTER USING UART_sendchar **/
-		u8_a_lettercounter++; /** JUMP TO THE NEXT LETTER **/
-	}
-}
  a00:	cf 91       	pop	r28
  a02:	1f 91       	pop	r17
  a04:	0f 91       	pop	r16
  a06:	08 95       	ret
 
 00000a08 <UART_receivechar>:
-/** ARGUMENTS : u8_recdata (POINTER TO STORE THE RECEIVED DATA)    **/
-/** RETURNS   : uart_errorstatus                                   **/
-/********************************************************************/
-uart_errorstatus UART_receivechar(uint8_t * u8_a_recdata)
-{
-	while( ! (UCSRA & (1 << 7)) ) ; /** WAIT UNTILL THE DATA RECIVE FLAG RAISED **/
  a08:	5f 9b       	sbis	0x0b, 7	; 11
  a0a:	fe cf       	rjmp	.-4      	; 0xa08 <UART_receivechar>
-	
-	*u8_a_recdata =  UDR ;	/** RETURN THE DATA IN UDR **/
  a0c:	2c b1       	in	r18, 0x0c	; 12
  a0e:	fc 01       	movw	r30, r24
  a10:	20 83       	st	Z, r18
-	
-	
-}
  a12:	08 95       	ret
 
 00000a14 <UART_receivestr>:
-/** FUNCTION TO RECEIVE STRING VIA UART                                   **/
-/** ARGUMENTS : u8_a_recstring (POINTER TO STORE THE RECEIVED DATA)       **/
-/** RETURNS   : uart_errorstatus                                          **/
-/***************************************************************************/
-uart_errorstatus UART_receivestr(uint8_t * u8_a_recstring)
-{
  a14:	0f 93       	push	r16
  a16:	1f 93       	push	r17
  a18:	cf 93       	push	r28
  a1a:	8c 01       	movw	r16, r24
-	uint8_t u8_a_lettercounter = 0 ; /** COUNTER TO LETTERS **/
  a1c:	c0 e0       	ldi	r28, 0x00	; 0
-	 
-	//UART_receivechar(u8_a_recstring[u8_a_lettercounter]) ; /** RECEIVE THE FIRST CHARACTER **/
-	
-	while (u8_a_recstring[u8_a_lettercounter] != '\0') /** WHILE STRING ISN'T NULL **/
  a1e:	03 c0       	rjmp	.+6      	; 0xa26 <UART_receivestr+0x12>
-	{
-		
-		UART_receivechar(&u8_a_recstring[u8_a_lettercounter]); /** RECEIVE CHARACTER **/
  a20:	0e 94 04 05 	call	0xa08	; 0xa08 <UART_receivechar>
-		
-		u8_a_lettercounter++ ; /** JUMP TO THE NEXT INDEX **/
  a24:	cf 5f       	subi	r28, 0xFF	; 255
-{
-	uint8_t u8_a_lettercounter = 0 ; /** COUNTER TO LETTERS **/
-	 
-	//UART_receivechar(u8_a_recstring[u8_a_lettercounter]) ; /** RECEIVE THE FIRST CHARACTER **/
-	
-	while (u8_a_recstring[u8_a_lettercounter] != '\0') /** WHILE STRING ISN'T NULL **/
  a26:	c8 01       	movw	r24, r16
  a28:	8c 0f       	add	r24, r28
  a2a:	91 1d       	adc	r25, r1
@@ -2561,11 +1675,6 @@ uart_errorstatus UART_receivestr(uint8_t * u8_a_recstring)
  a2e:	20 81       	ld	r18, Z
  a30:	21 11       	cpse	r18, r1
  a32:	f6 cf       	rjmp	.-20     	; 0xa20 <UART_receivestr+0xc>
-		u8_a_lettercounter++ ; /** JUMP TO THE NEXT INDEX **/
-		
-	}
-	
-	//u8_a_recstring[u8_a_lettercounter] = '\0';	/** SET THE LAST CHARACTER TO NULL **/
  a34:	cf 91       	pop	r28
  a36:	1f 91       	pop	r17
  a38:	0f 91       	pop	r16
