@@ -29,7 +29,4 @@ void APP_getamount(void);
 /** FUNCTION TO VALIDATE THE CARD FROM THE DATABASE **/
 void APP_cardvalidate(void);
 
-/** FUNCTION TO VERIFY USER PIN **/
-//void APP_pinvalidate();
-
 #endif /* APP_H_ */

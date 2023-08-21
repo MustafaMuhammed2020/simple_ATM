@@ -19,10 +19,5 @@ int main(void)
 	
 	APP_cardvalidate(); /** VALIDATE THE CARD **/
 	
-// 	while (1)
-// 	{
-// 		
-// 	
-// 	}
 }
 
