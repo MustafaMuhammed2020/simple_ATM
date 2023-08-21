@@ -133,7 +133,7 @@ void APP_init()
 	
 	LCD_init();  /** INITIALIZE LCD **/
       c2:	0e 94 88 04 	call	0x910	; 0x910 <LCD_init>
-	TMR0_delayms(20); /** SET DELAY FOR LCD INITILIZATION **/
+	TMR0_delayms(MS_DELAY_20); /** SET DELAY FOR LCD INITILIZATION **/
       c6:	64 e1       	ldi	r22, 0x14	; 20
       c8:	70 e0       	ldi	r23, 0x00	; 0
       ca:	80 e0       	ldi	r24, 0x00	; 0
@@ -150,7 +150,7 @@ void APP_init()
       dc:	83 ed       	ldi	r24, 0xD3	; 211
       de:	90 e0       	ldi	r25, 0x00	; 0
       e0:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
-	TMR0_delayms(500);
+	TMR0_delayms(MS_DELAY_500);
       e4:	64 ef       	ldi	r22, 0xF4	; 244
       e6:	71 e0       	ldi	r23, 0x01	; 1
       e8:	80 e0       	ldi	r24, 0x00	; 0
@@ -160,14 +160,14 @@ void APP_init()
 	LCD_sendcmd(LCD_CLEAR);
       f0:	81 e0       	ldi	r24, 0x01	; 1
       f2:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-	TMR0_delayms(20);
+	TMR0_delayms(MS_DELAY_20);
       f6:	64 e1       	ldi	r22, 0x14	; 20
       f8:	70 e0       	ldi	r23, 0x00	; 0
       fa:	80 e0       	ldi	r24, 0x00	; 0
       fc:	90 e0       	ldi	r25, 0x00	; 0
       fe:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 	
-	LCD_goto(0 ,1);
+	LCD_goto(LCD_POS_0 , LCD_POS_1);
      102:	61 e0       	ldi	r22, 0x01	; 1
      104:	80 e0       	ldi	r24, 0x00	; 0
      106:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -184,7 +184,7 @@ void APP_init()
      116:	60 e0       	ldi	r22, 0x00	; 0
      118:	80 e0       	ldi	r24, 0x00	; 0
      11a:	0e 94 04 03 	call	0x608	; 0x608 <Is_pressed>
-	} while (triggerstatus == 0);
+	} while (triggerstatus == FALSE);
      11e:	80 91 b0 01 	lds	r24, 0x01B0	; 0x8001b0 <triggerstatus>
      122:	88 23       	and	r24, r24
      124:	b1 f3       	breq	.-20     	; 0x112 <APP_init+0x80>
@@ -193,7 +193,7 @@ void APP_init()
 	LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
      126:	81 e0       	ldi	r24, 0x01	; 1
      128:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-	TMR0_delayms(20);
+	TMR0_delayms(MS_DELAY_20);
      12c:	64 e1       	ldi	r22, 0x14	; 20
      12e:	70 e0       	ldi	r23, 0x00	; 0
      130:	80 e0       	ldi	r24, 0x00	; 0
@@ -210,14 +210,14 @@ void APP_readuserpin()
 	LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
      13a:	81 e0       	ldi	r24, 0x01	; 1
      13c:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-	TMR0_delayms(20);
+	TMR0_delayms(MS_DELAY_20);
      140:	64 e1       	ldi	r22, 0x14	; 20
      142:	70 e0       	ldi	r23, 0x00	; 0
      144:	80 e0       	ldi	r24, 0x00	; 0
      146:	90 e0       	ldi	r25, 0x00	; 0
      148:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 	
-	LCD_goto(0 , 0);
+	LCD_goto(LCD_POS_0 , LCD_POS_0);
      14c:	60 e0       	ldi	r22, 0x00	; 0
      14e:	80 e0       	ldi	r24, 0x00	; 0
      150:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -226,7 +226,7 @@ void APP_readuserpin()
      156:	90 e0       	ldi	r25, 0x00	; 0
      158:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
 	
-	for(counter = 0 ; counter < 4 ; counter++)
+	for(counter = FIRST_PIN_DIGIT ; counter < LAST_PIN_DIGIT ; counter++)
      15c:	10 92 b8 01 	sts	0x01B8, r1	; 0x8001b8 <counter>
      160:	25 c0       	rjmp	.+74     	; 0x1ac <APP_readuserpin+0x72>
 	{
@@ -237,7 +237,7 @@ void APP_readuserpin()
      16a:	81 30       	cpi	r24, 0x01	; 1
      16c:	d1 f3       	breq	.-12     	; 0x162 <APP_readuserpin+0x28>
 		
-		LCD_goto(1 , counter+4); /** DISPLAY * WITH EACH PRESSED NUMBER **/
+		LCD_goto(LCD_POS_1 , counter+LAST_PIN_DIGIT); /** DISPLAY * WITH EACH PRESSED NUMBER **/
      16e:	60 91 b8 01 	lds	r22, 0x01B8	; 0x8001b8 <counter>
      172:	6c 5f       	subi	r22, 0xFC	; 252
      174:	81 e0       	ldi	r24, 0x01	; 1
@@ -253,7 +253,7 @@ void APP_readuserpin()
      188:	ff 4f       	sbci	r31, 0xFF	; 255
      18a:	80 91 b3 01 	lds	r24, 0x01B3	; 0x8001b3 <u8_a_pressednum>
      18e:	80 83       	st	Z, r24
-		TMR0_delayms(200);
+		TMR0_delayms(MS_DELAY_200);
      190:	68 ec       	ldi	r22, 0xC8	; 200
      192:	70 e0       	ldi	r23, 0x00	; 0
      194:	80 e0       	ldi	r24, 0x00	; 0
@@ -263,12 +263,12 @@ void APP_readuserpin()
 		u8_returnstatus = KEYPAD_readFail; /** REINITIALIZE STATE TO ACCEPT NEW NUMBER **/
      19c:	81 e0       	ldi	r24, 0x01	; 1
      19e:	80 93 61 00 	sts	0x0061, r24	; 0x800061 <u8_returnstatus>
-	TMR0_delayms(20);
+	TMR0_delayms(MS_DELAY_20);
 	
-	LCD_goto(0 , 0);
+	LCD_goto(LCD_POS_0 , LCD_POS_0);
 	LCD_writestr("Enter Your PIN"); /** SAK USER TO INSERT CARD PIN **/
 	
-	for(counter = 0 ; counter < 4 ; counter++)
+	for(counter = FIRST_PIN_DIGIT ; counter < LAST_PIN_DIGIT ; counter++)
      1a2:	80 91 b8 01 	lds	r24, 0x01B8	; 0x8001b8 <counter>
      1a6:	8f 5f       	subi	r24, 0xFF	; 255
      1a8:	80 93 b8 01 	sts	0x01B8, r24	; 0x8001b8 <counter>
@@ -280,22 +280,22 @@ void APP_readuserpin()
 	
 	do /** LONG PRESS FOR 2 SECONDS ON ZERO **/
 	{
-		KEYPAD_read(&status); /** READ THE ZERO FROM KEYPAD **/
+		KEYPAD_read(&status);          /** READ THE ZERO FROM KEYPAD **/
      1b4:	82 eb       	ldi	r24, 0xB2	; 178
      1b6:	91 e0       	ldi	r25, 0x01	; 1
      1b8:	0e 94 7d 03 	call	0x6fa	; 0x6fa <KEYPAD_read>
-		TMR0_delayms(940);   /** DELAY FOR 2000 SECONDS    **/
+		TMR0_delayms(MS_DELAY_940);    /** DELAY FOR 2000 SECONDS    **/
      1bc:	6c ea       	ldi	r22, 0xAC	; 172
      1be:	73 e0       	ldi	r23, 0x03	; 3
      1c0:	80 e0       	ldi	r24, 0x00	; 0
      1c2:	90 e0       	ldi	r25, 0x00	; 0
      1c4:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
-		KEYPAD_read(&status); /** READ THE ZERO FROM KEYPAD **/
+		KEYPAD_read(&status);          /** READ THE ZERO FROM KEYPAD **/
      1c8:	82 eb       	ldi	r24, 0xB2	; 178
      1ca:	91 e0       	ldi	r25, 0x01	; 1
      1cc:	0e 94 7d 03 	call	0x6fa	; 0x6fa <KEYPAD_read>
 		
-	} while (status != '0');
+	} while (status != ZERO_CHAR);
      1d0:	80 91 b2 01 	lds	r24, 0x01B2	; 0x8001b2 <status>
      1d4:	80 33       	cpi	r24, 0x30	; 48
      1d6:	71 f7       	brne	.-36     	; 0x1b4 <APP_readuserpin+0x7a>
@@ -315,7 +315,7 @@ void APP_startcardcomm()
      1de:	81 e0       	ldi	r24, 0x01	; 1
      1e0:	0e 94 6d 06 	call	0xcda	; 0xcda <DIO_setpinvalue>
 	
-	TMR0_delayms(30);
+	TMR0_delayms(MS_DELAY_30);
      1e4:	6e e1       	ldi	r22, 0x1E	; 30
      1e6:	70 e0       	ldi	r23, 0x00	; 0
      1e8:	80 e0       	ldi	r24, 0x00	; 0
@@ -326,7 +326,7 @@ void APP_startcardcomm()
      1f0:	83 e8       	ldi	r24, 0x83	; 131
      1f2:	90 e0       	ldi	r25, 0x00	; 0
      1f4:	0e 94 8b 07 	call	0xf16	; 0xf16 <SPI_receivestring>
-	TMR0_delayms(30);
+	TMR0_delayms(MS_DELAY_30);
      1f8:	6e e1       	ldi	r22, 0x1E	; 30
      1fa:	70 e0       	ldi	r23, 0x00	; 0
      1fc:	80 e0       	ldi	r24, 0x00	; 0
@@ -342,7 +342,7 @@ void APP_startcardcomm()
 	u8_a_pinnotmatched = 1 ;
      20c:	81 e0       	ldi	r24, 0x01	; 1
      20e:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
-	while (u8_a_pintry <= MAX_TRY && u8_a_pinnotmatched != 0  ) /** CHECK PIN MATCHING FOR TWO TIMES **/
+	while (u8_a_pintry <= MAX_TRY && u8_a_pinnotmatched != FALSE  ) /** CHECK PIN MATCHING FOR TWO TIMES **/
      212:	4d c0       	rjmp	.+154    	; 0x2ae <APP_startcardcomm+0xd4>
 	{
 		u8_a_pinnotmatched = strcmp(u8_g_cardpin , u8_g_userpin); /** COMPARE THE TWO PINs **/
@@ -353,26 +353,26 @@ void APP_startcardcomm()
      21c:	0e 94 1f 0a 	call	0x143e	; 0x143e <strcmp>
      220:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
 		
-		if (u8_a_pinnotmatched == 0) /** PIN MATCHED **/
+		if (u8_a_pinnotmatched == FALSE) /** PIN MATCHED **/
      224:	88 23       	and	r24, r24
      226:	09 f4       	brne	.+2      	; 0x22a <APP_startcardcomm+0x50>
      228:	4a c0       	rjmp	.+148    	; 0x2be <APP_startcardcomm+0xe4>
+			break ;
+		}
 		
 		else /** PIN NOT MATCHED **/
 		{
-			
-			
 			LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
      22a:	81 e0       	ldi	r24, 0x01	; 1
      22c:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      230:	64 e1       	ldi	r22, 0x14	; 20
      232:	70 e0       	ldi	r23, 0x00	; 0
      234:	80 e0       	ldi	r24, 0x00	; 0
      236:	90 e0       	ldi	r25, 0x00	; 0
      238:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 			
-			LCD_goto(0,0);
+			LCD_goto(LCD_POS_0,LCD_POS_0);
      23c:	60 e0       	ldi	r22, 0x00	; 0
      23e:	80 e0       	ldi	r24, 0x00	; 0
      240:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -380,7 +380,7 @@ void APP_startcardcomm()
      244:	82 e0       	ldi	r24, 0x02	; 2
      246:	91 e0       	ldi	r25, 0x01	; 1
      248:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
-			TMR0_delayms(500);
+			TMR0_delayms(MS_DELAY_500);
      24c:	64 ef       	ldi	r22, 0xF4	; 244
      24e:	71 e0       	ldi	r23, 0x01	; 1
      250:	80 e0       	ldi	r24, 0x00	; 0
@@ -390,7 +390,7 @@ void APP_startcardcomm()
 			LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
      258:	81 e0       	ldi	r24, 0x01	; 1
      25a:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      25e:	64 e1       	ldi	r22, 0x14	; 20
      260:	70 e0       	ldi	r23, 0x00	; 0
      262:	80 e0       	ldi	r24, 0x00	; 0
@@ -406,9 +406,9 @@ void APP_startcardcomm()
      274:	83 30       	cpi	r24, 0x03	; 3
      276:	c8 f0       	brcs	.+50     	; 0x2aa <APP_startcardcomm+0xd0>
 			{
-				while (1)
+				while (TRUE)
 				{
-					LCD_goto(0,0);
+					LCD_goto(LCD_POS_0,LCD_POS_0);
      278:	60 e0       	ldi	r22, 0x00	; 0
      27a:	80 e0       	ldi	r24, 0x00	; 0
      27c:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -419,7 +419,7 @@ void APP_startcardcomm()
 					
 					BUZZ_on();
      288:	0e 94 29 03 	call	0x652	; 0x652 <BUZZ_on>
-					TMR0_delayms(500);
+					TMR0_delayms(MS_DELAY_500);
      28c:	64 ef       	ldi	r22, 0xF4	; 244
      28e:	71 e0       	ldi	r23, 0x01	; 1
      290:	80 e0       	ldi	r24, 0x00	; 0
@@ -428,7 +428,7 @@ void APP_startcardcomm()
 					
 					BUZZ_off();
      298:	0e 94 2f 03 	call	0x65e	; 0x65e <BUZZ_off>
-					TMR0_delayms(500);
+					TMR0_delayms(MS_DELAY_500);
      29c:	64 ef       	ldi	r22, 0xF4	; 244
      29e:	71 e0       	ldi	r23, 0x01	; 1
      2a0:	80 e0       	ldi	r24, 0x00	; 0
@@ -445,7 +445,7 @@ void APP_startcardcomm()
 	
 	/** VERIFY THE USER INSERTED PIN **/
 	u8_a_pinnotmatched = 1 ;
-	while (u8_a_pintry <= MAX_TRY && u8_a_pinnotmatched != 0  ) /** CHECK PIN MATCHING FOR TWO TIMES **/
+	while (u8_a_pintry <= MAX_TRY && u8_a_pinnotmatched != FALSE  ) /** CHECK PIN MATCHING FOR TWO TIMES **/
      2ae:	80 91 b1 01 	lds	r24, 0x01B1	; 0x8001b1 <u8_a_pintry>
      2b2:	83 30       	cpi	r24, 0x03	; 3
      2b4:	20 f4       	brcc	.+8      	; 0x2be <APP_startcardcomm+0xe4>
@@ -470,7 +470,7 @@ void APP_getamount()
 	LCD_sendcmd(LCD_CLEAR); /** CLEAR THE LCD **/
      2c8:	81 e0       	ldi	r24, 0x01	; 1
      2ca:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-	TMR0_delayms(20);
+	TMR0_delayms(MS_DELAY_20);
      2ce:	64 e1       	ldi	r22, 0x14	; 20
      2d0:	70 e0       	ldi	r23, 0x00	; 0
      2d2:	80 e0       	ldi	r24, 0x00	; 0
@@ -481,14 +481,14 @@ void APP_getamount()
      2da:	84 e1       	ldi	r24, 0x14	; 20
      2dc:	91 e0       	ldi	r25, 0x01	; 1
      2de:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
-	TMR0_delayms(200);
+	TMR0_delayms(MS_DELAY_200);
      2e2:	68 ec       	ldi	r22, 0xC8	; 200
      2e4:	70 e0       	ldi	r23, 0x00	; 0
      2e6:	80 e0       	ldi	r24, 0x00	; 0
      2e8:	90 e0       	ldi	r25, 0x00	; 0
      2ea:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 	
-	LCD_goto(1,2);
+	LCD_goto(LCD_POS_1,LCD_POS_2);
      2ee:	62 e0       	ldi	r22, 0x02	; 2
      2f0:	81 e0       	ldi	r24, 0x01	; 1
      2f2:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -506,9 +506,9 @@ void APP_getamount()
      2fe:	00 e0       	ldi	r16, 0x00	; 0
      300:	10 e0       	ldi	r17, 0x00	; 0
 	LCD_writestr("ENTER THE AMOUNT"); /** ASK USER TO ENTER THE AMOUNT NEEDED **/
-	TMR0_delayms(200);
+	TMR0_delayms(MS_DELAY_200);
 	
-	LCD_goto(1,2);
+	LCD_goto(LCD_POS_1,LCD_POS_2);
 
 	for(counter = 0 ; counter <= AMOUNT_DIGITS ; counter++)
      302:	45 c0       	rjmp	.+138    	; 0x38e <APP_getamount+0xce>
@@ -521,7 +521,7 @@ void APP_getamount()
      30a:	84 30       	cpi	r24, 0x04	; 4
      30c:	39 f4       	brne	.+14     	; 0x31c <APP_getamount+0x5c>
 		{
-			LCD_writechar('.'); /** DECIMEL POINT **/
+			LCD_writechar(DECIMEL_DOT); /** DECIMEL POINT **/
      30e:	8e e2       	ldi	r24, 0x2E	; 46
      310:	0e 94 c9 04 	call	0x992	; 0x992 <LCD_writechar>
 			u8_returnstatus = KEYPAD_readFail; /** REINITIALIZE STATE TO ACCEPT NEW NUMBER **/
@@ -538,7 +538,7 @@ void APP_getamount()
      324:	81 30       	cpi	r24, 0x01	; 1
      326:	d1 f3       	breq	.-12     	; 0x31c <APP_getamount+0x5c>
 		
-		TMR0_delayms(200);
+		TMR0_delayms(MS_DELAY_200);
      328:	68 ec       	ldi	r22, 0xC8	; 200
      32a:	70 e0       	ldi	r23, 0x00	; 0
      32c:	80 e0       	ldi	r24, 0x00	; 0
@@ -553,7 +553,7 @@ void APP_getamount()
      340:	84 30       	cpi	r24, 0x04	; 4
      342:	c8 f4       	brcc	.+50     	; 0x376 <APP_getamount+0xb6>
 		{
-			u16_l_amout += (u8_a_pressednum - 48) * u8_a_pos ; /** CHARACTER TO INTEGER **/
+			u16_l_amout += (u8_a_pressednum - CHAR_INT_DIFF) * u8_a_pos ; /** CHARACTER TO INTEGER **/
      344:	80 91 b3 01 	lds	r24, 0x01B3	; 0x8001b3 <u8_a_pressednum>
      348:	90 e0       	ldi	r25, 0x00	; 0
      34a:	c0 97       	sbiw	r24, 0x30	; 48
@@ -566,7 +566,7 @@ void APP_getamount()
      358:	11 24       	eor	r1, r1
      35a:	02 0f       	add	r16, r18
      35c:	13 1f       	adc	r17, r19
-			u8_a_pos /= 10 ; /** GO TO THE NEXT POSITION **/
+			u8_a_pos /= DIGIT_DIVIDER ; /** GO TO THE NEXT POSITION **/
      35e:	9e 01       	movw	r18, r28
      360:	ad ec       	ldi	r26, 0xCD	; 205
      362:	bc ec       	ldi	r27, 0xCC	; 204
@@ -588,9 +588,9 @@ void APP_getamount()
      37e:	81 e0       	ldi	r24, 0x01	; 1
      380:	80 93 61 00 	sts	0x0061, r24	; 0x800061 <u8_returnstatus>
 	LCD_writestr("ENTER THE AMOUNT"); /** ASK USER TO ENTER THE AMOUNT NEEDED **/
-	TMR0_delayms(200);
+	TMR0_delayms(MS_DELAY_200);
 	
-	LCD_goto(1,2);
+	LCD_goto(LCD_POS_1,LCD_POS_2);
 
 	for(counter = 0 ; counter <= AMOUNT_DIGITS ; counter++)
      384:	80 91 b8 01 	lds	r24, 0x01B8	; 0x8001b8 <counter>
@@ -692,14 +692,14 @@ void APP_cardvalidate(void)
 			LCD_sendcmd(LCD_CLEAR);
      3f4:	81 e0       	ldi	r24, 0x01	; 1
      3f6:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      3fa:	64 e1       	ldi	r22, 0x14	; 20
      3fc:	70 e0       	ldi	r23, 0x00	; 0
      3fe:	80 e0       	ldi	r24, 0x00	; 0
      400:	90 e0       	ldi	r25, 0x00	; 0
      402:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 			
-			LCD_goto(0,0);
+			LCD_goto(LCD_POS_0,LCD_POS_0);
      406:	60 e0       	ldi	r22, 0x00	; 0
      408:	80 e0       	ldi	r24, 0x00	; 0
      40a:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -722,14 +722,14 @@ void APP_cardvalidate(void)
 			LCD_sendcmd(LCD_CLEAR);
      428:	81 e0       	ldi	r24, 0x01	; 1
      42a:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      42e:	64 e1       	ldi	r22, 0x14	; 20
      430:	70 e0       	ldi	r23, 0x00	; 0
      432:	80 e0       	ldi	r24, 0x00	; 0
      434:	90 e0       	ldi	r25, 0x00	; 0
      436:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 			
-			LCD_goto(0 , 0);
+			LCD_goto(LCD_POS_0 , LCD_POS_0);
      43a:	60 e0       	ldi	r22, 0x00	; 0
      43c:	80 e0       	ldi	r24, 0x00	; 0
      43e:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -738,7 +738,7 @@ void APP_cardvalidate(void)
      444:	91 e0       	ldi	r25, 0x01	; 1
      446:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
 			
-			LCD_goto(1 , 0);
+			LCD_goto(LCD_POS_1 , LCD_POS_0);
      44a:	60 e0       	ldi	r22, 0x00	; 0
      44c:	81 e0       	ldi	r24, 0x01	; 1
      44e:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -747,7 +747,7 @@ void APP_cardvalidate(void)
      454:	91 e0       	ldi	r25, 0x01	; 1
      456:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
 			
-			TMR0_delayms(1000);
+			TMR0_delayms(MS_DELAY_1000);
      45a:	68 ee       	ldi	r22, 0xE8	; 232
      45c:	73 e0       	ldi	r23, 0x03	; 3
      45e:	80 e0       	ldi	r24, 0x00	; 0
@@ -784,14 +784,14 @@ void APP_cardvalidate(void)
 			LCD_sendcmd(LCD_CLEAR);
      498:	81 e0       	ldi	r24, 0x01	; 1
      49a:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      49e:	64 e1       	ldi	r22, 0x14	; 20
      4a0:	70 e0       	ldi	r23, 0x00	; 0
      4a2:	80 e0       	ldi	r24, 0x00	; 0
      4a4:	90 e0       	ldi	r25, 0x00	; 0
      4a6:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 			
-			LCD_goto(0,1);
+			LCD_goto(LCD_POS_0,LCD_POS_1);
      4aa:	61 e0       	ldi	r22, 0x01	; 1
      4ac:	80 e0       	ldi	r24, 0x00	; 0
      4ae:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -800,7 +800,7 @@ void APP_cardvalidate(void)
      4b4:	91 e0       	ldi	r25, 0x01	; 1
      4b6:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
 			
-			LCD_goto(1,3);
+			LCD_goto(LCD_POS_1,LCD_POS_3);
      4ba:	63 e0       	ldi	r22, 0x03	; 3
      4bc:	81 e0       	ldi	r24, 0x01	; 1
      4be:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -816,14 +816,14 @@ void APP_cardvalidate(void)
 			LCD_sendcmd(LCD_CLEAR);
      4cc:	81 e0       	ldi	r24, 0x01	; 1
      4ce:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      4d2:	64 e1       	ldi	r22, 0x14	; 20
      4d4:	70 e0       	ldi	r23, 0x00	; 0
      4d6:	80 e0       	ldi	r24, 0x00	; 0
      4d8:	90 e0       	ldi	r25, 0x00	; 0
      4da:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 			
-			LCD_goto(0,3);
+			LCD_goto(LCD_POS_0,LCD_POS_3);
      4de:	63 e0       	ldi	r22, 0x03	; 3
      4e0:	80 e0       	ldi	r24, 0x00	; 0
      4e2:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -831,7 +831,7 @@ void APP_cardvalidate(void)
      4e6:	88 e6       	ldi	r24, 0x68	; 104
      4e8:	91 e0       	ldi	r25, 0x01	; 1
      4ea:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
-			LCD_goto(1,3);
+			LCD_goto(LCD_POS_1,LCD_POS_3);
      4ee:	63 e0       	ldi	r22, 0x03	; 3
      4f0:	81 e0       	ldi	r24, 0x01	; 1
      4f2:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -840,7 +840,7 @@ void APP_cardvalidate(void)
      4f8:	91 e0       	ldi	r25, 0x01	; 1
      4fa:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
 			
-			TMR0_delayms(1000);
+			TMR0_delayms(MS_DELAY_1000);
      4fe:	68 ee       	ldi	r22, 0xE8	; 232
      500:	73 e0       	ldi	r23, 0x03	; 3
      502:	80 e0       	ldi	r24, 0x00	; 0
@@ -850,7 +850,7 @@ void APP_cardvalidate(void)
 			LCD_sendcmd(LCD_CLEAR);
      50a:	81 e0       	ldi	r24, 0x01	; 1
      50c:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      510:	64 e1       	ldi	r22, 0x14	; 20
      512:	70 e0       	ldi	r23, 0x00	; 0
      514:	80 e0       	ldi	r24, 0x00	; 0
@@ -885,7 +885,7 @@ void APP_cardvalidate(void)
      552:	8a 83       	std	Y+2, r24	; 0x02
      554:	9b 83       	std	Y+3, r25	; 0x03
 			
-			LCD_goto(0,0);
+			LCD_goto(LCD_POS_0,LCD_POS_0);
      556:	60 e0       	ldi	r22, 0x00	; 0
      558:	80 e0       	ldi	r24, 0x00	; 0
      55a:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -893,7 +893,7 @@ void APP_cardvalidate(void)
      55e:	8d e7       	ldi	r24, 0x7D	; 125
      560:	91 e0       	ldi	r25, 0x01	; 1
      562:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
-			LCD_goto(1,4);
+			LCD_goto(LCD_POS_1,LCD_POS_4);
      566:	64 e0       	ldi	r22, 0x04	; 4
      568:	81 e0       	ldi	r24, 0x01	; 1
      56a:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -905,7 +905,7 @@ void APP_cardvalidate(void)
      576:	0e 94 e7 08 	call	0x11ce	; 0x11ce <__fixsfsi>
      57a:	0e 94 56 05 	call	0xaac	; 0xaac <LCD_writeint>
 			
-			TMR0_delayms(1000);
+			TMR0_delayms(MS_DELAY_1000);
      57e:	68 ee       	ldi	r22, 0xE8	; 232
      580:	73 e0       	ldi	r23, 0x03	; 3
      582:	80 e0       	ldi	r24, 0x00	; 0
@@ -915,13 +915,13 @@ void APP_cardvalidate(void)
 			LCD_sendcmd(LCD_CLEAR);
      58a:	81 e0       	ldi	r24, 0x01	; 1
      58c:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-			TMR0_delayms(20);
+			TMR0_delayms(MS_DELAY_20);
      590:	64 e1       	ldi	r22, 0x14	; 20
      592:	70 e0       	ldi	r23, 0x00	; 0
      594:	80 e0       	ldi	r24, 0x00	; 0
      596:	90 e0       	ldi	r25, 0x00	; 0
      598:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
-			LCD_goto(0,0);
+			LCD_goto(LCD_POS_0,LCD_POS_0);
      59c:	60 e0       	ldi	r22, 0x00	; 0
      59e:	80 e0       	ldi	r24, 0x00	; 0
      5a0:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -942,14 +942,14 @@ void APP_cardvalidate(void)
 		LCD_sendcmd(LCD_CLEAR);
      5b2:	81 e0       	ldi	r24, 0x01	; 1
      5b4:	0e 94 3f 04 	call	0x87e	; 0x87e <LCD_sendcmd>
-		TMR0_delayms(20);
+		TMR0_delayms(MS_DELAY_20);
      5b8:	64 e1       	ldi	r22, 0x14	; 20
      5ba:	70 e0       	ldi	r23, 0x00	; 0
      5bc:	80 e0       	ldi	r24, 0x00	; 0
      5be:	90 e0       	ldi	r25, 0x00	; 0
      5c0:	0e 94 c7 07 	call	0xf8e	; 0xf8e <TMR0_delayms>
 		
-		LCD_goto(0,0);
+		LCD_goto(LCD_POS_0,LCD_POS_0);
      5c4:	60 e0       	ldi	r22, 0x00	; 0
      5c6:	80 e0       	ldi	r24, 0x00	; 0
      5c8:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -957,7 +957,7 @@ void APP_cardvalidate(void)
      5cc:	89 e9       	ldi	r24, 0x99	; 153
      5ce:	91 e0       	ldi	r25, 0x01	; 1
      5d0:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
-		LCD_goto(1,0);
+		LCD_goto(LCD_POS_1,LCD_POS_0);
      5d4:	60 e0       	ldi	r22, 0x00	; 0
      5d6:	81 e0       	ldi	r24, 0x01	; 1
      5d8:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
@@ -967,7 +967,7 @@ void APP_cardvalidate(void)
      5e0:	0e 94 10 05 	call	0xa20	; 0xa20 <LCD_writestr>
 		
 		/** DISPLAY BELL SHAPE **/
-		LCD_goto(0 , 15);
+		LCD_goto(LCD_POS_0 , LCD_POS_15);
      5e4:	6f e0       	ldi	r22, 0x0F	; 15
      5e6:	80 e0       	ldi	r24, 0x00	; 0
      5e8:	0e 94 23 05 	call	0xa46	; 0xa46 <LCD_goto>
