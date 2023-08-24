@@ -32,7 +32,8 @@ uint8_t u8_g_cardpin[PIN_NUM_SIZE] = "0000";                  /** GLOBAL VARIABL
 uint8_t u8_g_cardpan[PAN_NUM_SIZE] = "0000000000000000000";  /** GLOBAL VARIABLE TO HOLD THE CARD PAN     **/
 uint8_t u8_g_userpin[PIN_NUM_SIZE] = "0000"; /** GLOBAL VARIABLE TO GET USER PIN **/
 
-uint8_t u8_g_bell[8] =  { 0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00}; /** BELL SHAPE PATTERN **/
+uint8_t u8_g_bell[BELL_SHAPE_SIZE] =  { BELL_ROW_1, BELL_ROW_2, BELL_ROW_3, BELL_ROW_4, 
+	                                    BELL_ROW_5, BELL_ROW_6, BELL_ROW_7, BELL_ROW_8 }; /** BELL SHAPE PATTERN **/
 
 uint8_t u8_a_pressednum = 0 ; /** VARIABLE TO STORE THE PRESSED NUM FROM KEYPAD **/
 

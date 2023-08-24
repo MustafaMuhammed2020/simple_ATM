@@ -341,7 +341,7 @@ void APP_startcardcomm()
 	/** VERIFY THE USER INSERTED PIN **/
 	u8_a_pinnotmatched = 1 ;
      20c:	81 e0       	ldi	r24, 0x01	; 1
-     20e:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+     20e:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__data_start>
 	while (u8_a_pintry <= MAX_TRY && u8_a_pinnotmatched != FALSE  ) /** CHECK PIN MATCHING FOR TWO TIMES **/
      212:	4d c0       	rjmp	.+154    	; 0x2ae <APP_startcardcomm+0xd4>
 	{
@@ -351,7 +351,7 @@ void APP_startcardcomm()
      218:	83 e8       	ldi	r24, 0x83	; 131
      21a:	90 e0       	ldi	r25, 0x00	; 0
      21c:	0e 94 1f 0a 	call	0x143e	; 0x143e <strcmp>
-     220:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+     220:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__data_start>
 		
 		if (u8_a_pinnotmatched == FALSE) /** PIN MATCHED **/
      224:	88 23       	and	r24, r24
@@ -449,7 +449,7 @@ void APP_startcardcomm()
      2ae:	80 91 b1 01 	lds	r24, 0x01B1	; 0x8001b1 <u8_a_pintry>
      2b2:	83 30       	cpi	r24, 0x03	; 3
      2b4:	20 f4       	brcc	.+8      	; 0x2be <APP_startcardcomm+0xe4>
-     2b6:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+     2b6:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__data_start>
      2ba:	81 11       	cpse	r24, r1
      2bc:	ab cf       	rjmp	.-170    	; 0x214 <APP_startcardcomm+0x3a>
      2be:	08 95       	ret

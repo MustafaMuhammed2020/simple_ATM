@@ -4,7 +4,6 @@
 /* Version : V02                                  */
 /* Hint    : implementation of application layer  */
 /**************************************************/
-
 #include <string.h>
 
 /** INCLUDE LIBRARIES **/
